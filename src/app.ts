@@ -20,7 +20,7 @@ app.use('/v1', router);
 app.use(errorMiddleware);
 
 app.use('/', (req: Request, res: Response, next: NextFunction): void => {
-  res.json({ message: 'Hallo! Catch-all route.' });
+  res.json({});
 });
 
 export default app;

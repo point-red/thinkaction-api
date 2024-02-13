@@ -19,6 +19,6 @@ app.use((0, body_parser_1.urlencoded)({ extended: true }));
 app.use('/v1', routes_1.router);
 app.use(error_middleware_1.errorMiddleware);
 app.use('/', (req, res, next) => {
-    res.json({ message: 'Hallo! Catch-all route.' });
+    res.json({});
 });
 exports.default = app;
