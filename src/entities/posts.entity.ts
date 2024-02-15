@@ -61,8 +61,8 @@ export class PostEntity {
       errors.caption = 'Caption is required.';
     }
 
-    if (!this.post.photo || this.post.photo.length === 0) {
-      errors.photo = 'At least one photo is required.';
+    if (this.post.photo && !Array.isArray(this.post.photo)) {
+      errors.like = 'Photo must be an array.';
     }
 
     if (this.post.like && !Array.isArray(this.post.like)) {
