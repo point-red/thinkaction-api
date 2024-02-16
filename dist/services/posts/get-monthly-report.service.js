@@ -10,26 +10,65 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
+const user_repository_1 = require("../../repositories/user.repository");
 class GetMonthlyReportService {
     constructor(postRepository) {
         this.postRepository = postRepository;
     }
     handle(data, authUserId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const startDate = new Date(`${data.year}-0${data.month}-01`);
-            const endDate = new Date(`${data.year}-0${data.month + 1}-01`);
+            const startDate = new Date(data.year, data.month - 1, 1); // Menggunakan data.month - 1 untuk mendapatkan bulan sebelumnya
+            const endDate = new Date(data.year, data.month, 0);
             const pipeline = [
                 {
                     $match: {
-                        userId: new mongodb_1.ObjectId(authUserId),
-                        createdDate: {
-                            $gte: startDate,
-                            $lte: endDate,
+                        _id: new mongodb_1.ObjectId(authUserId),
+                    },
+                },
+                {
+                    $unwind: '$categoryResolution',
+                },
+                {
+                    $lookup: {
+                        from: 'posts',
+                        localField: 'categoryResolution._id',
+                        foreignField: 'categoryResolutionId',
+                        as: 'postsData',
+                    },
+                },
+                {
+                    $addFields: {
+                        postsData: {
+                            $filter: {
+                                input: '$postsData',
+                                as: 'post',
+                                cond: { $eq: ['$$post.type', 'resolutions'] },
+                            },
                         },
                     },
                 },
+                {
+                    $unwind: '$postsData',
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        categoryResolution: {
+                            $mergeObjects: ['$categoryResolution', { updatedDate: '$postsData.updatedDate' }],
+                        },
+                    },
+                },
+                {
+                    $match: {
+                        $and: [
+                            { 'categoryResolution.createdDate': { $gte: startDate } },
+                            { 'categoryResolution.createdDate': { $lte: endDate } }, // Memeriksa apakah tanggal createdDate kurang dari atau sama dengan endDate
+                        ],
+                    },
+                },
             ];
-            const allPost = yield this.postRepository.aggregate(pipeline);
+            const userRepository = new user_repository_1.UserRepository();
+            const allPost = yield userRepository.aggregate(pipeline);
             return allPost;
         });
     }
