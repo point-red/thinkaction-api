@@ -18,7 +18,7 @@ class UpdateResolutionsService {
         this.postRepository = postRepository;
     }
     handle(data, authUserId, id) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f;
         return __awaiter(this, void 0, void 0, function* () {
             const post = yield this.postRepository.readOne(id);
             if (!post) {
@@ -37,7 +37,7 @@ class UpdateResolutionsService {
                 dueDate: (_c = new Date(data.dueDate)) !== null && _c !== void 0 ? _c : post.dueDate,
                 updatedDate: new Date(),
                 shareWith: (_d = data.shareWith) !== null && _d !== void 0 ? _d : post.shareWith,
-                isComplete: post.isComplete,
+                isComplete: (_e = data.isComplete) !== null && _e !== void 0 ? _e : post.isComplete,
                 isUpdating: true,
                 createdDate: post.createdDate,
             });
@@ -54,9 +54,10 @@ class UpdateResolutionsService {
             }
             let resolutionObj = userData.categoryResolution.find((item) => item._id.toString() === dataPost.categoryResolutionId.toString());
             let name = resolutionObj && resolutionObj.name;
+            console.log('isi dari iscomplete', dataPost.isComplete);
             const categoryResolution = {
                 _id: dataPost.categoryResolutionId,
-                name: (_e = data.categoryName) !== null && _e !== void 0 ? _e : name,
+                name: (_f = data.categoryName) !== null && _f !== void 0 ? _f : name,
                 resolution: dataPost.caption,
                 isComplete: dataPost.isComplete,
                 createdDate: dataPost.createdDate,

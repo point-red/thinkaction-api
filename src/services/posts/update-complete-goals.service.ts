@@ -4,6 +4,7 @@ import { DocInterface } from '../../entities/docInterface';
 import { ResponseError } from '../../middleware/error.middleware';
 import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
+import UpdateResolutionsService from './update-resolution.service';
 
 export default class UpdateCompleteGoalsService {
   private postRepository: PostRepository;
@@ -46,6 +47,26 @@ export default class UpdateCompleteGoalsService {
     if (!dataPost) {
       throw new ResponseError(404, 'Comment not found');
     }
+
+    const categoryResolution: any = await this.postRepository.aggregate([
+      {
+        $match: {
+          type: 'resolutions',
+        },
+      },
+      {
+        $match: {
+          categoryResolutionId: dataPost.categoryResolutionId,
+        },
+      },
+    ]);
+    let updateResolutionsService = new UpdateResolutionsService(this.postRepository);
+
+    const data2 = {
+      isComplete: dataPost.isComplete,
+    };
+
+    await updateResolutionsService.handle(data2, authUserId, categoryResolution[0]._id);
 
     const userRepository = new UserRepository();
 

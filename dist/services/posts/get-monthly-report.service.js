@@ -17,7 +17,7 @@ class GetMonthlyReportService {
     }
     handle(data, authUserId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const startDate = new Date(data.year, data.month - 1, 1); // Menggunakan data.month - 1 untuk mendapatkan bulan sebelumnya
+            const startDate = new Date(data.year, data.month - 1, 1);
             const endDate = new Date(data.year, data.month, 0);
             const pipeline = [
                 {
@@ -60,16 +60,45 @@ class GetMonthlyReportService {
                 },
                 {
                     $match: {
-                        $and: [
-                            { 'categoryResolution.createdDate': { $gte: startDate } },
-                            { 'categoryResolution.createdDate': { $lte: endDate } }, // Memeriksa apakah tanggal createdDate kurang dari atau sama dengan endDate
-                        ],
+                        $and: [{ 'categoryResolution.createdDate': { $gte: startDate } }, { 'categoryResolution.createdDate': { $lte: endDate } }],
                     },
                 },
             ];
             const userRepository = new user_repository_1.UserRepository();
             const allPost = yield userRepository.aggregate(pipeline);
-            return allPost;
+            function getWeeksInMonth(year, month, allPost) {
+                const weeks = {};
+                const startDate = new Date(year, month - 1, 1);
+                const endDate = new Date(year, month, 0);
+                let currentDate = new Date(startDate);
+                let weekNumber = 1;
+                while (currentDate <= endDate) {
+                    const startOfWeek = new Date(currentDate);
+                    const endOfWeek = new Date(currentDate);
+                    endOfWeek.setDate(endOfWeek.getDate() + 6);
+                    const weekObj = {};
+                    allPost.forEach((item) => {
+                        const categoryResolutionName = item.categoryResolution.name;
+                        if (item.categoryResolution.isComplete === true && item.categoryResolution.updatedDate <= endOfWeek) {
+                            weekObj[categoryResolutionName] = true;
+                            weekObj['startDate'] = startOfWeek;
+                            weekObj['endDate'] = endOfWeek;
+                        }
+                        else {
+                            weekObj[categoryResolutionName] = false;
+                            weekObj['startDate'] = startOfWeek;
+                            weekObj['endDate'] = endOfWeek;
+                        }
+                    });
+                    weeks['week' + weekNumber] = weekObj;
+                    currentDate.setDate(currentDate.getDate() + 7);
+                    weekNumber++;
+                }
+                return weeks;
+            }
+            const weeksInMonth = getWeeksInMonth(data.year, data.month, allPost);
+            console.log(weeksInMonth);
+            return weeksInMonth;
         });
     }
 }

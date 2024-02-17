@@ -32,7 +32,7 @@ export default class UpdateResolutionsService {
       dueDate: new Date(data.dueDate) ?? post.dueDate,
       updatedDate: new Date(),
       shareWith: data.shareWith ?? post.shareWith,
-      isComplete: post.isComplete,
+      isComplete: data.isComplete ?? post.isComplete,
       isUpdating: true,
       createdDate: post.createdDate,
     });
@@ -56,6 +56,8 @@ export default class UpdateResolutionsService {
     let resolutionObj = userData.categoryResolution.find((item: any) => item._id.toString() === dataPost.categoryResolutionId.toString());
 
     let name = resolutionObj && resolutionObj.name;
+
+    console.log('isi dari iscomplete', dataPost.isComplete);
 
     const categoryResolution = {
       _id: dataPost.categoryResolutionId,

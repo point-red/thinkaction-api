@@ -8,10 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const posts_entity_1 = require("../../entities/posts.entity");
 const user_repository_1 = require("../../repositories/user.repository");
 const mongodb_1 = require("mongodb");
+const update_resolution_service_1 = __importDefault(require("./update-resolution.service"));
 class CreateCompleteGoalsService {
     constructor(postRepository) {
         this.postRepository = postRepository;
@@ -38,6 +42,23 @@ class CreateCompleteGoalsService {
             let postData = postEntity.CheckData();
             let post = yield this.postRepository.create(postData);
             const dataPost = yield this.postRepository.readOne(post.insertedId.toString());
+            const categoryResolution = yield this.postRepository.aggregate([
+                {
+                    $match: {
+                        type: 'resolutions',
+                    },
+                },
+                {
+                    $match: {
+                        categoryResolutionId: new mongodb_1.ObjectId(data.categoryResolutionId),
+                    },
+                },
+            ]);
+            let updateResolutionsService = new update_resolution_service_1.default(this.postRepository);
+            const data2 = {
+                isComplete: data.isComplete,
+            };
+            yield updateResolutionsService.handle(data2, authUserId, categoryResolution[0]._id);
             const userRepository = new user_repository_1.UserRepository();
             const userData = yield userRepository.readOne(authUserId);
             return {

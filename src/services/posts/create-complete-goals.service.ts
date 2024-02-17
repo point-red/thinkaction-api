@@ -4,6 +4,7 @@ import { DocInterface } from '../../entities/docInterface';
 import { ResponseError } from '../../middleware/error.middleware';
 import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
+import UpdateResolutionsService from './update-resolution.service';
 
 export default class CreateCompleteGoalsService {
   private postRepository: PostRepository;
@@ -36,6 +37,27 @@ export default class CreateCompleteGoalsService {
     let post = await this.postRepository.create(postData);
 
     const dataPost: any = await this.postRepository.readOne(post.insertedId.toString());
+
+    const categoryResolution: any = await this.postRepository.aggregate([
+      {
+        $match: {
+          type: 'resolutions',
+        },
+      },
+      {
+        $match: {
+          categoryResolutionId: new ObjectId(data.categoryResolutionId),
+        },
+      },
+    ]);
+
+    let updateResolutionsService = new UpdateResolutionsService(this.postRepository);
+
+    const data2 = {
+      isComplete: data.isComplete,
+    };
+
+    await updateResolutionsService.handle(data2, authUserId, categoryResolution[0]._id);
 
     const userRepository = new UserRepository();
 
