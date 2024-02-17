@@ -11,14 +11,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
 const user_repository_1 = require("../../repositories/user.repository");
-class GetMonthlyReportService {
+class GetYearReportService {
     constructor(postRepository) {
         this.postRepository = postRepository;
     }
     handle(data, authUserId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const startDate = new Date(data.year, data.month - 1, 1);
-            const endDate = new Date(data.year, data.month, 0);
+            const startDate = new Date(data.year, 0, 1);
+            const endDate = new Date(data.year, 11, 31);
             const pipeline = [
                 {
                     $match: {
@@ -66,50 +66,53 @@ class GetMonthlyReportService {
             ];
             const userRepository = new user_repository_1.UserRepository();
             const allPost = yield userRepository.aggregate(pipeline);
-            function getWeeksInMonth(year, month, allPost) {
+            function getWeeksInYear(year, allPost) {
                 const weeks = {};
-                const totalCategories = {};
-                const startDate = new Date(year, month - 1, 1);
-                const endDate = new Date(year, month, 0);
-                let currentDate = new Date(startDate);
                 let weekNumber = 1;
-                // Menginisialisasi totalCategories untuk setiap kategori menjadi 0
+                const totalCategories = {};
+                // Inisialisasi totalCategories untuk setiap kategori menjadi 0
                 allPost.forEach((item) => {
                     const categoryResolutionName = item.categoryResolution.name;
                     totalCategories[categoryResolutionName] = 0;
                 });
-                while (currentDate <= endDate) {
-                    const startOfWeek = new Date(currentDate);
-                    const endOfWeek = new Date(currentDate);
-                    endOfWeek.setDate(endOfWeek.getDate() + 6);
-                    const weekObj = {};
-                    let trueCount = 0;
-                    allPost.forEach((item) => {
-                        const categoryResolutionName = item.categoryResolution.name;
-                        if (item.categoryResolution.isComplete === true && item.categoryResolution.updatedDate <= endOfWeek) {
-                            weekObj[categoryResolutionName] = true;
-                            trueCount++; // Increment trueCount jika nilai true
-                        }
-                        else if (item.categoryResolution.createdDate > endOfWeek) {
-                            return;
-                        }
-                        else {
-                            weekObj[categoryResolutionName] = false;
-                        }
-                        totalCategories[categoryResolutionName]++; // Increment jumlah total kategori
-                    });
-                    const percentage = trueCount / Object.keys(totalCategories).length;
-                    weeks['percentage'] = percentage;
-                    weeks[`week${weekNumber}`] = weekObj;
-                    currentDate.setDate(currentDate.getDate() + 7);
-                    weekNumber++;
+                for (let month = 0; month < 12; month++) {
+                    const startDate = new Date(year, month, 1);
+                    const endDate = new Date(year, month + 1, 0);
+                    let currentDate = new Date(startDate);
+                    while (currentDate <= endDate) {
+                        const startOfWeek = new Date(currentDate);
+                        const endOfWeek = new Date(currentDate);
+                        endOfWeek.setDate(endOfWeek.getDate() + 6);
+                        const weekObj = {};
+                        let trueCount = 0; // Deklarasi di dalam perulangan untuk setiap minggu
+                        allPost.forEach((item) => {
+                            const categoryResolutionName = item.categoryResolution.name;
+                            if (item.categoryResolution.isComplete === true && item.categoryResolution.updatedDate <= endOfWeek) {
+                                weekObj[categoryResolutionName] = true;
+                                trueCount++; // Increment trueCount jika nilai true
+                            }
+                            else if (item.categoryResolution.createdDate > endOfWeek) {
+                                return;
+                            }
+                            else {
+                                weekObj[categoryResolutionName] = false;
+                            }
+                            totalCategories[categoryResolutionName]++; // Increment jumlah total kategori
+                        });
+                        // Menghitung persentase nilai true untuk setiap kategori
+                        const percentage = trueCount / Object.keys(totalCategories).length;
+                        weeks['percentage'] = percentage; // Menambahkan persentase ke dalam objek minggu
+                        weeks[`week${weekNumber}`] = weekObj;
+                        currentDate.setDate(currentDate.getDate() + 7);
+                        weekNumber++;
+                    }
                 }
                 return weeks;
             }
-            const weeksInMonth = getWeeksInMonth(data.year, data.month, allPost);
-            console.log(weeksInMonth);
-            return weeksInMonth;
+            const weeksInYear = getWeeksInYear(data.year, allPost);
+            console.log(weeksInYear);
+            return weeksInYear;
         });
     }
 }
-exports.default = GetMonthlyReportService;
+exports.default = GetYearReportService;

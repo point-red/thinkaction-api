@@ -66,11 +66,18 @@ export default class GetMonthlyReportService {
 
     function getWeeksInMonth(year: number, month: number, allPost: any) {
       const weeks: any = {};
+      const totalCategories: any = {};
 
       const startDate = new Date(year, month - 1, 1);
       const endDate = new Date(year, month, 0);
       let currentDate = new Date(startDate);
       let weekNumber = 1;
+
+      // Menginisialisasi totalCategories untuk setiap kategori menjadi 0
+      allPost.forEach((item: any) => {
+        const categoryResolutionName = item.categoryResolution.name;
+        totalCategories[categoryResolutionName] = 0;
+      });
 
       while (currentDate <= endDate) {
         const startOfWeek = new Date(currentDate);
@@ -78,21 +85,24 @@ export default class GetMonthlyReportService {
         endOfWeek.setDate(endOfWeek.getDate() + 6);
 
         const weekObj: any = {};
+        let trueCount = 0;
 
         allPost.forEach((item: any) => {
           const categoryResolutionName = item.categoryResolution.name;
           if (item.categoryResolution.isComplete === true && item.categoryResolution.updatedDate <= endOfWeek) {
             weekObj[categoryResolutionName] = true;
-            weekObj['startDate'] = startOfWeek;
-            weekObj['endDate'] = endOfWeek;
+            trueCount++; // Increment trueCount jika nilai true
+          } else if (item.categoryResolution.createdDate > endOfWeek) {
+            return;
           } else {
             weekObj[categoryResolutionName] = false;
-            weekObj['startDate'] = startOfWeek;
-            weekObj['endDate'] = endOfWeek;
           }
+          totalCategories[categoryResolutionName]++; // Increment jumlah total kategori
         });
 
-        weeks['week' + weekNumber] = weekObj;
+        const percentage = trueCount / Object.keys(totalCategories).length;
+        weeks['percentage'] = percentage;
+        weeks[`week${weekNumber}`] = weekObj;
 
         currentDate.setDate(currentDate.getDate() + 7);
         weekNumber++;

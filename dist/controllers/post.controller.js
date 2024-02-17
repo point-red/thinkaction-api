@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 class PostController {
-    constructor(getAllPostService, getOnePostService, getAllLikePostService, createResolutionService, createWeeklyGoalsService, createCompleteGoalsService, updateResolutionsService, updateWeeklyGoalsService, updateCompleteGoalsService, likePostService, unlikePostService, getMonthlyReportService, deletePostService) {
+    constructor(getAllPostService, getOnePostService, getAllLikePostService, createResolutionService, createWeeklyGoalsService, createCompleteGoalsService, updateResolutionsService, updateWeeklyGoalsService, updateCompleteGoalsService, likePostService, unlikePostService, getMonthlyReportService, getYearReportService, deletePostService) {
         this.createResolutionService = createResolutionService;
         this.createWeeklyGoalsService = createWeeklyGoalsService;
         this.createCompleteGoalsService = createCompleteGoalsService;
@@ -29,6 +29,7 @@ class PostController {
         this.getOnePostService = getOnePostService;
         this.getAllLikePostService = getAllLikePostService;
         this.getMonthlyReportService = getMonthlyReportService;
+        this.getYearReportService = getYearReportService;
     }
     getAllPost(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -170,6 +171,18 @@ class PostController {
             try {
                 const authUserId = req.userData._id;
                 const result = yield this.getMonthlyReportService.handle(req.body, authUserId);
+                return res.status(200).json({ status: 'success', data: result });
+            }
+            catch (e) {
+                next(e);
+            }
+        });
+    }
+    getYearReport(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const authUserId = req.userData._id;
+                const result = yield this.getYearReportService.handle(req.body, authUserId);
                 return res.status(200).json({ status: 'success', data: result });
             }
             catch (e) {

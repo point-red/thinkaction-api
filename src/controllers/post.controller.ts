@@ -13,6 +13,7 @@ import GetOnePostService from '../services/posts/get-one.service';
 import GetAllLikePostService from '../services/posts/get-all-like.service';
 import GetMonthlyReportService from '../services/posts/get-monthly-report.service';
 import dotenv from 'dotenv';
+import GetYearReportService from '../services/posts/get-year-report.service';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ export default class PostController {
   private getOnePostService: GetOnePostService;
   private getAllLikePostService: GetAllLikePostService;
   private getMonthlyReportService: GetMonthlyReportService;
+  private getYearReportService: GetYearReportService;
 
   constructor(
     getAllPostService: GetAllPostService,
@@ -44,6 +46,7 @@ export default class PostController {
     likePostService: LikePostService,
     unlikePostService: UnlikePostService,
     getMonthlyReportService: GetMonthlyReportService,
+    getYearReportService: GetYearReportService,
     deletePostService: DeletePostService
   ) {
     this.createResolutionService = createResolutionService;
@@ -59,6 +62,7 @@ export default class PostController {
     this.getOnePostService = getOnePostService;
     this.getAllLikePostService = getAllLikePostService;
     this.getMonthlyReportService = getMonthlyReportService;
+    this.getYearReportService = getYearReportService;
   }
 
   public async getAllPost(req: any, res: Response, next: NextFunction) {
@@ -199,6 +203,18 @@ export default class PostController {
       const authUserId = req.userData._id;
 
       const result = await this.getMonthlyReportService.handle(req.body, authUserId);
+
+      return res.status(200).json({ status: 'success', data: result });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async getYearReport(req: any, res: Response, next: NextFunction) {
+    try {
+      const authUserId = req.userData._id;
+
+      const result = await this.getYearReportService.handle(req.body, authUserId);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {

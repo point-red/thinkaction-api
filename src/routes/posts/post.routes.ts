@@ -15,6 +15,7 @@ import GetAllPostService from '../../services/posts/get-all.service';
 import GetOnePostService from '../../services/posts/get-one.service';
 import GetAllLikePostService from '../../services/posts/get-all-like.service';
 import GetMonthlyReportService from '../../services/posts/get-monthly-report.service';
+import GetYearReportService from '../../services/posts/get-year-report.service';
 
 const router = Router();
 const postRepository = new PostRepository();
@@ -30,6 +31,7 @@ const updateCompleteGoals = new UpdateCompleteGoalsService(postRepository);
 const likePost = new LikePostService(postRepository);
 const unlikePost = new UnlikePostService(postRepository);
 const getMonthlyReport = new GetMonthlyReportService(postRepository);
+const getYearReport = new GetYearReportService(postRepository);
 const deletePost = new DeletePostService(postRepository);
 const postController = new PostController(
   getAllPost,
@@ -44,12 +46,15 @@ const postController = new PostController(
   likePost,
   unlikePost,
   getMonthlyReport,
+  getYearReport,
   deletePost
 );
 
 router.get('/', verifyUser, (req, res, next) => postController.getAllPost(req, res, next));
 
 router.get('/monthly', verifyUser, (req, res, next) => postController.getMonthlyReport(req, res, next));
+
+router.get('/yearly', verifyUser, (req, res, next) => postController.getYearReport(req, res, next));
 
 router.get('/:id', verifyUser, (req, res, next) => postController.getOnePost(req, res, next));
 
