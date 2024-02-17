@@ -4,12 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export default class Database {
-  // private uri: string = process.env.DATABASE_URI || '';
-  // private dbName: string = process.env.DATABASE_NAME || '';
-  // public db!: Db;
-  // private client: MongoClient;
-  // public collection!: Collection;
-  private uri: string = 'mongodb://127.0.0.1:27017';
+  private uri: string = process.env.DATABASE_URI || 'mongodb+srv://zildanmarginata:9i0GEZR8vImJTcuI@mymongodb.htazbwd.mongodb.net/mymongodb?retryWrites=true&w=majority';
   private dbName: string = 'think_action';
   public db!: Db;
   private client: MongoClient;
