@@ -486,8 +486,6 @@ describe('GET /v1/users/history', () => {
 
     const response = await request(app).get('/v1/users/history').set('Authorization', `Bearer ${result.body.token}`);
 
-    console.log(response.body);
-
     expect(response.status).toBe(200);
     expect(response.body.results).toBeDefined();
     expect(Array.isArray(response.body.data)).toBe(true);
@@ -506,8 +504,6 @@ describe('DELETE /v1/users/history', () => {
     await request(app).get('/v1/users/search').set('Authorization', `Bearer ${result.body.token}`).send({ username: 'test' });
 
     const response = await request(app).delete('/v1/users/history').set('Authorization', `Bearer ${result.body.token}`);
-
-    console.log(response.body);
 
     expect(response.status).toBe(204);
     expect(response.body).toEqual({});
@@ -1188,6 +1184,14 @@ describe('PATCH /v1/posts/:id/completeGoals', () => {
       .set('Authorization', `Bearer ${currentUser.body.token}`)
       .send({ caption: 'This is updated caption complete goal.', shareWith: 'private' });
 
+    console.log(weeklyGoals.body);
+    console.log(resolution.body);
+    console.log(response.body);
+    console.log(resolution.body.data.categoryResolutionId);
+    console.log(weeklyGoals.body.data._id);
+    console.log(completeGoal.body);
+    console.log(completeGoal.body.data._id);
+
     expect(response.status).toBe(200);
     expect(response.body.status).toEqual('success');
     expect(response.body.data._id).toBeDefined();
@@ -1264,6 +1268,107 @@ describe('POST /v1/posts/unlike', () => {
     expect(response.body.message).toEqual('Post unliked successfully.');
     expect(response.body.data._id).toBeDefined();
     expect(response.body.data.likeCount).toEqual(0);
+  });
+});
+
+describe('GET /v1/posts/monthly', () => {
+  afterEach(async () => {
+    await deleteAllUsers();
+    await deleteAllNotifications();
+    await deleteAllComments();
+    await deleteAllPosts();
+  });
+
+  it('should can get monthly report', async () => {
+    const currentUser = await register();
+
+    const dataPost = {
+      categoryName: 'Finance',
+      caption: 'I want to get Rp 30.000.000',
+      photo: ['linkphoto1.png'],
+      dueDate: '2024-10-25T10:39:58.606Z',
+      shareWith: 'everyone',
+    };
+
+    const resolution = await request(app).post('/v1/posts/resolutions').set('Authorization', `Bearer ${currentUser.body.token}`).send(dataPost);
+
+    const dataWeeklyGoal = { categoryResolutionId: resolution.body.data.categoryResolutionId, caption: 'This week I want to get Rp 1.000.000', photo: ['linkphoto1.png'], dueDate: '2023-11-30T10:39:58.606Z', shareWith: 'everyone' };
+
+    const weeklyGoals = await request(app).post('/v1/posts/weeklyGoals').set('Authorization', `Bearer ${currentUser.body.token}`).send(dataWeeklyGoal);
+
+    const dataCompleteGoal = {
+      categoryResolutionId: resolution.body.data.categoryResolutionId,
+      weeklyGoalId: weeklyGoals.body.data._id,
+      caption: 'I already completed this weekly goal.',
+      photo: ['linkphoto1.png'],
+      shareWith: 'everyone',
+      isComplete: true,
+    };
+
+    await request(app).post('/v1/posts/completeGoals').set('Authorization', `Bearer ${currentUser.body.token}`).send(dataCompleteGoal);
+
+    const response = await request(app).get('/v1/posts/monthly').set('Authorization', `Bearer ${currentUser.body.token}`).send({ year: 2024, month: 2 });
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toEqual('success');
+    expect(response.body.data.percentage).toBeDefined();
+    expect(response.body.data.week1).toBeDefined();
+    expect(response.body.data.week2).toBeDefined();
+    expect(response.body.data.week3).toBeDefined();
+    expect(response.body.data.week4).toBeDefined();
+    expect(response.body.data.week5).toBeDefined();
+  });
+});
+
+describe('GET /v1/posts/yearly', () => {
+  afterEach(async () => {
+    await deleteAllUsers();
+    await deleteAllNotifications();
+    await deleteAllComments();
+    await deleteAllPosts();
+  });
+
+  it('should can get yearly report', async () => {
+    const currentUser = await register();
+
+    const dataPost = {
+      categoryName: 'Finance',
+      caption: 'I want to get Rp 30.000.000',
+      photo: ['linkphoto1.png'],
+      dueDate: '2024-10-25T10:39:58.606Z',
+      shareWith: 'everyone',
+    };
+
+    const resolution = await request(app).post('/v1/posts/resolutions').set('Authorization', `Bearer ${currentUser.body.token}`).send(dataPost);
+
+    const dataWeeklyGoal = { categoryResolutionId: resolution.body.data.categoryResolutionId, caption: 'This week I want to get Rp 1.000.000', photo: ['linkphoto1.png'], dueDate: '2023-11-30T10:39:58.606Z', shareWith: 'everyone' };
+
+    const weeklyGoals = await request(app).post('/v1/posts/weeklyGoals').set('Authorization', `Bearer ${currentUser.body.token}`).send(dataWeeklyGoal);
+
+    const dataCompleteGoal = {
+      categoryResolutionId: resolution.body.data.categoryResolutionId,
+      weeklyGoalId: weeklyGoals.body.data._id,
+      caption: 'I already completed this weekly goal.',
+      photo: ['linkphoto1.png'],
+      shareWith: 'everyone',
+      isComplete: true,
+    };
+
+    await request(app).post('/v1/posts/completeGoals').set('Authorization', `Bearer ${currentUser.body.token}`).send(dataCompleteGoal);
+
+    const response = await request(app).get('/v1/posts/yearly').set('Authorization', `Bearer ${currentUser.body.token}`).send({ year: 2024, month: 2 });
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toEqual('success');
+    expect(response.body.data.percentage).toBeDefined();
+    expect(response.body.data.week1).toBeDefined();
+    expect(response.body.data.week6).toBeDefined();
+    expect(response.body.data.week25).toBeDefined();
+    expect(response.body.data.week30).toBeDefined();
+    expect(response.body.data.week35).toBeDefined();
+    expect(response.body.data.week40).toBeDefined();
+    expect(response.body.data.week50).toBeDefined();
+    expect(response.body.data.week57).toBeDefined();
   });
 });
 

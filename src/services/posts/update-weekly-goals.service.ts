@@ -22,7 +22,7 @@ export default class UpdateWeeklyGoalsService {
     const postEntity = new PostEntity({
       _id: post._id,
       userId: new ObjectId(authUserId),
-      categoryResolutionId: new ObjectId(data.categoryResolutionId) ?? post.categoryResolutionId,
+      categoryResolutionId: data.categoryResolutionId ? new ObjectId(data.categoryResolutionId) : post.categoryResolutionId,
       type: post.type,
       caption: data.caption ?? post.caption,
       photo: data.photo ?? post.photo,

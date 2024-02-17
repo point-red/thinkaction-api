@@ -13,7 +13,7 @@ class Database {
         // public db!: Db;
         // private client: MongoClient;
         // public collection!: Collection;
-        this.uri = 'mongodb+srv://zildanmarginata:9i0GEZR8vImJTcuI@mymongodb.htazbwd.mongodb.net/mymongodb?retryWrites=true&w=majority';
+        this.uri = 'mongodb://127.0.0.1:27017';
         this.dbName = 'think_action';
         try {
             this.client = new mongodb_1.MongoClient(this.uri);

@@ -22,7 +22,7 @@ class UpdateCompleteGoalsService {
         this.postRepository = postRepository;
     }
     handle(data, authUserId, id) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             const post = yield this.postRepository.readOne(id);
             if (!post) {
@@ -31,18 +31,18 @@ class UpdateCompleteGoalsService {
             const postEntity = new posts_entity_1.PostEntity({
                 _id: post._id,
                 userId: new mongodb_1.ObjectId(authUserId),
-                categoryResolutionId: (_a = new mongodb_1.ObjectId(data.categoryResolutionId)) !== null && _a !== void 0 ? _a : post.categoryResolutionId,
+                categoryResolutionId: data.categoryResolutionId ? new mongodb_1.ObjectId(data.categoryResolutionId) : post.categoryResolutionId,
                 type: post.type,
-                caption: (_b = data.caption) !== null && _b !== void 0 ? _b : post.caption,
+                caption: (_a = data.caption) !== null && _a !== void 0 ? _a : post.caption,
                 photo: post.photo,
                 like: [],
                 likeCount: 0,
                 commentCount: 0,
                 dueDate: post.dueDate,
                 updatedDate: new Date(),
-                shareWith: (_c = data.shareWith) !== null && _c !== void 0 ? _c : post.shareWith,
-                weeklyGoalId: (_d = new mongodb_1.ObjectId(data.weeklyGoalId)) !== null && _d !== void 0 ? _d : post.weeklyGoalId,
-                isComplete: (_e = data.isComplete) !== null && _e !== void 0 ? _e : post.isComplete,
+                shareWith: (_b = data.shareWith) !== null && _b !== void 0 ? _b : post.shareWith,
+                weeklyGoalId: data.weeklyGoalId ? new mongodb_1.ObjectId(data.weeklyGoalId) : post.weeklyGoalId,
+                isComplete: (_c = data.isComplete) !== null && _c !== void 0 ? _c : post.isComplete,
                 isUpdating: true,
                 createdDate: post.createdDate,
             });

@@ -9,7 +9,7 @@ export default class Database {
   // public db!: Db;
   // private client: MongoClient;
   // public collection!: Collection;
-  private uri: string = 'mongodb+srv://zildanmarginata:9i0GEZR8vImJTcuI@mymongodb.htazbwd.mongodb.net/mymongodb?retryWrites=true&w=majority';
+  private uri: string = 'mongodb://127.0.0.1:27017';
   private dbName: string = 'think_action';
   public db!: Db;
   private client: MongoClient;

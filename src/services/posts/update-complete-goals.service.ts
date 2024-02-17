@@ -23,7 +23,7 @@ export default class UpdateCompleteGoalsService {
     const postEntity = new PostEntity({
       _id: post._id,
       userId: new ObjectId(authUserId),
-      categoryResolutionId: new ObjectId(data.categoryResolutionId) ?? post.categoryResolutionId,
+      categoryResolutionId: data.categoryResolutionId ? new ObjectId(data.categoryResolutionId) : post.categoryResolutionId,
       type: post.type,
       caption: data.caption ?? post.caption,
       photo: post.photo,
@@ -33,7 +33,7 @@ export default class UpdateCompleteGoalsService {
       dueDate: post.dueDate,
       updatedDate: new Date(),
       shareWith: data.shareWith ?? post.shareWith,
-      weeklyGoalId: new ObjectId(data.weeklyGoalId) ?? post.weeklyGoalId,
+      weeklyGoalId: data.weeklyGoalId ? new ObjectId(data.weeklyGoalId) : post.weeklyGoalId,
       isComplete: data.isComplete ?? post.isComplete,
       isUpdating: true,
       createdDate: post.createdDate,
