@@ -1,5 +1,6 @@
 import { PostRepository } from '../../repositories/post.repository';
 import { DocInterface } from '../../entities/docInterface';
+import { ObjectId } from 'mongodb';
 
 export default class GetAllPostService {
   private postRepository: PostRepository;
@@ -15,7 +16,7 @@ export default class GetAllPostService {
           $expr: {
             $cond: {
               if: { $ne: [data.userId, null] },
-              then: { $eq: ['$userId', data.userId] },
+              then: { $eq: ['$userId', new ObjectId(data.userId)] },
               else: true,
             },
           },
