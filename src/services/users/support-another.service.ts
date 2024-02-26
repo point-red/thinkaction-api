@@ -14,6 +14,10 @@ export default class SupportAnotherUserService {
     const notificationRepository = new NotificationRepository();
     const userToSupport = await this.userRepository.findOne1(id, authUserId);
 
+    if (id === authUserId) {
+      throw new ResponseError(400, "Can't support current user");
+    }
+
     const authUser = await this.userRepository.readOne(authUserId);
     if (!authUser) {
       throw new ResponseError(400, 'User is not found');
