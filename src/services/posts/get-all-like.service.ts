@@ -50,6 +50,7 @@ export default class GetAllLikePostService {
           isPublic: 1,
         },
       },
+      { $limit: 10 },
     ];
     const allPost = await this.postRepository.aggregate(pipeline);
 
