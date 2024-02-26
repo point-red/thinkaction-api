@@ -19,6 +19,9 @@ class SupportAnotherUserService {
         return __awaiter(this, void 0, void 0, function* () {
             const notificationRepository = new notification_repository_1.NotificationRepository();
             const userToSupport = yield this.userRepository.findOne1(id, authUserId);
+            if (id === authUserId) {
+                throw new error_middleware_1.ResponseError(400, "Can't support current user");
+            }
             const authUser = yield this.userRepository.readOne(authUserId);
             if (!authUser) {
                 throw new error_middleware_1.ResponseError(400, 'User is not found');

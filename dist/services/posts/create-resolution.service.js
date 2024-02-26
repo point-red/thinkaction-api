@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const posts_entity_1 = require("../../entities/posts.entity");
+const error_middleware_1 = require("../../middleware/error.middleware");
 const user_repository_1 = require("../../repositories/user.repository");
 const mongodb_1 = require("mongodb");
 class CreateResolutionService {
@@ -18,6 +19,21 @@ class CreateResolutionService {
     }
     handle(data, authUserId) {
         return __awaiter(this, void 0, void 0, function* () {
+            const totalPosts = yield this.postRepository.aggregate([
+                {
+                    $match: {
+                        type: 'resolutions',
+                    },
+                },
+                {
+                    $match: {
+                        userId: new mongodb_1.ObjectId(authUserId),
+                    },
+                },
+            ]);
+            if (totalPosts.length === 7 || totalPosts.length > 7) {
+                throw new error_middleware_1.ResponseError(400, 'Resolutions cannot be more than 7');
+            }
             const postEntity = new posts_entity_1.PostEntity({
                 userId: new mongodb_1.ObjectId(authUserId),
                 categoryResolutionId: new mongodb_1.ObjectId(),

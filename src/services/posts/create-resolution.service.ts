@@ -13,16 +13,21 @@ export default class CreateResolutionService {
   }
 
   public async handle(data: DocInterface, authUserId: string) {
-    const totalPosts = await this.postRepository.aggregate([
+    const totalPosts: any = await this.postRepository.aggregate([
       {
         $match: {
-          type: 'resolution',
+          type: 'resolutions',
+        },
+      },
+      {
+        $match: {
+          userId: new ObjectId(authUserId),
         },
       },
     ]);
 
-    if (totalPosts.length === 7) {
-      throw new ResponseError(400, 'Resolution cannot be more than 7');
+    if (totalPosts.length === 7 || totalPosts.length > 7) {
+      throw new ResponseError(400, 'Resolutions cannot be more than 7');
     }
 
     const postEntity = new PostEntity({

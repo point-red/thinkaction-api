@@ -35,7 +35,7 @@ class PostEntity {
             errors.categoryResolutionId = 'Category resolution id is required for resolutions.';
         }
         if (!this.post.caption) {
-            errors.caption = 'Caption is required.';
+            errors.caption = 'Enter a caption';
         }
         if (this.post.photo && !Array.isArray(this.post.photo)) {
             errors.like = 'Photo must be an array.';
@@ -56,7 +56,7 @@ class PostEntity {
             errors.updatedDate = 'Updated date must be a Date object.';
         }
         if (this.post.shareWith === undefined) {
-            errors.shareWith = 'Share with is required.';
+            errors.shareWith = 'Choose a visibilty';
         }
         else if (!['everyone', 'supporter', 'private'].includes(this.post.shareWith)) {
             errors.shareWith = 'Share with must be either "everyone", "supporter", or "private".';

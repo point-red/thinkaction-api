@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const mongodb_1 = require("mongodb");
 class GetAllPostService {
     constructor(postRepository) {
         this.postRepository = postRepository;
@@ -21,7 +22,7 @@ class GetAllPostService {
                         $expr: {
                             $cond: {
                                 if: { $ne: [data.userId, null] },
-                                then: { $eq: ['$userId', data.userId] },
+                                then: { $eq: ['$userId', new mongodb_1.ObjectId(data.userId)] },
                                 else: true,
                             },
                         },

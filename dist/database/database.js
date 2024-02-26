@@ -8,12 +8,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 class Database {
     constructor(collection) {
-        // private uri: string = process.env.DATABASE_URI || '';
-        // private dbName: string = process.env.DATABASE_NAME || '';
-        // public db!: Db;
-        // private client: MongoClient;
-        // public collection!: Collection;
-        this.uri = 'mongodb://127.0.0.1:27017';
+        this.uri = 'mongodb+srv://zildanmarginata:9i0GEZR8vImJTcuI@mymongodb.htazbwd.mongodb.net/mymongodb?retryWrites=true&w=majority';
         this.dbName = 'think_action';
         try {
             this.client = new mongodb_1.MongoClient(this.uri);
