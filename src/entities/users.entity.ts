@@ -72,10 +72,12 @@ export class UserEntity {
       errors.username = 'Username must be a string.';
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!this.user.email) {
       errors.email = 'Email is required.';
-    } else if (typeof this.user.email !== 'string') {
-      errors.email = 'Email must be a string.';
+    } else if (!emailRegex.test(this.user.email)) {
+      errors.email = 'Invalid email format';
     }
 
     if (!this.user.password) {
