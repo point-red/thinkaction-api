@@ -58,7 +58,7 @@ export class PostEntity {
     }
 
     if (!this.post.caption) {
-      errors.caption = 'Caption is required.';
+      errors.caption = 'Enter a caption';
     }
 
     if (this.post.photo && !Array.isArray(this.post.photo)) {
@@ -86,7 +86,7 @@ export class PostEntity {
     }
 
     if (this.post.shareWith === undefined) {
-      errors.shareWith = 'Share with is required.';
+      errors.shareWith = 'Choose a visibilty';
     } else if (!['everyone', 'supporter', 'private'].includes(this.post.shareWith)) {
       errors.shareWith = 'Share with must be either "everyone", "supporter", or "private".';
     }
