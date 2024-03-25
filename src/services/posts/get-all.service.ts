@@ -9,7 +9,7 @@ export default class GetAllPostService {
     this.postRepository = postRepository;
   }
 
-  public async handle(data: DocInterface) {
+  public async handle(authUserId: string, data: DocInterface) {
     const pipeline = [
       {
         $match: {
@@ -57,6 +57,9 @@ export default class GetAllPostService {
           userInfo: {
             $arrayElemAt: ['$userInfo', 0],
           },
+          likedByCurrent: {
+            $in: [new ObjectId(authUserId), "$like"]
+          }
         },
       },
       {
@@ -68,6 +71,7 @@ export default class GetAllPostService {
           caption: 1,
           photo: 1,
           likeCount: 1,
+          likedByCurrent: 1,
           commentCount: 1,
           dueDate: 1,
           createdDate: 1,
@@ -77,6 +81,7 @@ export default class GetAllPostService {
           userInfo: {
             _id: 1,
             username: 1,
+            fullname: 1,
             photo: 1,
             resolution: 1,
             categoryResolution: 1,
@@ -111,6 +116,7 @@ export default class GetAllPostService {
       };
       pipeline.push(sortStage);
     }
+
     const allPost = await this.postRepository.aggregate(pipeline);
 
     return allPost;

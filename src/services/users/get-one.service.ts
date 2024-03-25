@@ -20,13 +20,14 @@ export default class GetOneUserService {
             ? {}
             : {
                 isSupporting: {
-                  $in: [authUserId, '$supporter'],
+                  $in: [new ObjectId(authUserId), '$supporter'],
                 },
               }),
         },
       },
       {
         $project: {
+          _id: 1,
           fullname: 1,
           username: 1,
           email: 1,

@@ -18,6 +18,10 @@ import RejectSupportRequestService from '../../services/users/reject-support-req
 import SearchUserService from '../../services/users/search.service';
 import GetHistoryService from '../../services/users/get-history.service';
 import DeleteHistoryService from '../../services/users/delete-history.service';
+import multer from 'multer';
+import os from 'os';
+
+const upload = multer({ dest: os.tmpdir() });
 
 const router = Router();
 const userRepository = new UserRepository();
@@ -85,7 +89,7 @@ router.get('/:id/supporter', verifyUser, (req, res, next) => userController.getA
 
 router.get('/:id/supporting', verifyUser, (req, res, next) => userController.getAllSupporting(req, res, next));
 
-router.patch('/', verifyUser, (req, res, next) => userController.updateCurrentUser(req, res, next));
+router.patch('/', verifyUser, upload.single('photo'), (req, res, next) => userController.updateCurrentUser(req, res, next));
 
 router.delete('/history', verifyUser, (req, res, next) => userController.deleteHistory(req, res, next));
 

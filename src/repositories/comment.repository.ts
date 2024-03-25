@@ -19,7 +19,7 @@ export class CommentRepository extends Database {
     return await this.collection.updateOne(
       { _id: new ObjectId(id) },
       {
-        $push: { reply: data },
+        $push: { reply: data } as any,
         $inc: { replyCount: 1 },
       }
     );
@@ -38,7 +38,7 @@ export class CommentRepository extends Database {
     return await this.collection.updateOne(
       { _id: new ObjectId(id) },
       {
-        $pull: { reply: new ObjectId(data) },
+        $pull: { reply: new ObjectId(data) } as any,
         $inc: { replyCount: -1 },
       }
     );

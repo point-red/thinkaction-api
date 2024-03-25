@@ -72,7 +72,7 @@ class AuthController {
     logout(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return res.status(200).json({ status: 'success', message: 'Sucessfully logout.' });
+                return res.status(200).json({ status: 'success', message: 'Successfully logged out.' });
             }
             catch (error) {
                 console.error(error);

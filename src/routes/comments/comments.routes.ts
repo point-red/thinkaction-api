@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { verifyUser } from '../../middleware/auth.middleware';
 import { CommentRepository } from '../../repositories/comment.repository';
+import { PostRepository } from '../../repositories/post.repository';
 import CommentController from '../../controllers/comment.controller';
 import CreateCommentService from '../../services/comments/create.service';
 import CreateReplyCommentService from '../../services/comments/create-reply.service';
@@ -11,12 +12,13 @@ import GetOneCommentService from '../../services/comments/get-all-reply.service'
 
 const router = Router();
 const commentRepository = new CommentRepository();
+const postRepository = new PostRepository();
 const getAllComment = new GetAllCommentService(commentRepository);
 const getOneComment = new GetOneCommentService(commentRepository);
-const createComment = new CreateCommentService(commentRepository);
-const createReplyComment = new CreateReplyCommentService(commentRepository);
+const createComment = new CreateCommentService(commentRepository, postRepository);
+const createReplyComment = new CreateReplyCommentService(commentRepository, postRepository);
 const updateComment = new UpdateCommentService(commentRepository);
-const deleteComment = new DeleteCommentService(commentRepository);
+const deleteComment = new DeleteCommentService(commentRepository, postRepository);
 const commentController = new CommentController(getAllComment, getOneComment, createComment, createReplyComment, updateComment, deleteComment);
 
 router.get('/:postId', verifyUser, (req, res, next) => commentController.getAllComment(req, res, next));

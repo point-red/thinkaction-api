@@ -10,7 +10,7 @@ export default class GetOnePostService {
     this.postRepository = postRepository;
   }
 
-  public async handle(id: string) {
+  public async handle(authUserId: string, id: string) {
     const pipeline = [
       {
         $match: {
@@ -30,6 +30,9 @@ export default class GetOnePostService {
           userInfo: {
             $arrayElemAt: ['$userInfo', 0],
           },
+          likedByCurrent: {
+            $in: [new ObjectId(authUserId), "$like"]
+          }
         },
       },
       {
@@ -41,6 +44,7 @@ export default class GetOnePostService {
           caption: 1,
           photo: 1,
           likeCount: 1,
+          likedByCurrent: 1,
           commentCount: 1,
           dueDate: 1,
           createdDate: 1,

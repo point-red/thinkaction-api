@@ -145,9 +145,9 @@ export default class UserController {
     try {
       const { id } = req.params;
       const authUserId = req.userData._id;
-      const { page, limit } = req.body;
+      const { page, limit, username } = req.query;
 
-      const result = await this.getAllSupporterService.handle(id, authUserId, page, limit);
+      const result = await this.getAllSupporterService.handle(id, authUserId, page, limit, username || '');
 
       return res.status(200).json({ status: 'success', limit, page, results: result.length, data: result });
     } catch (e) {
@@ -159,9 +159,9 @@ export default class UserController {
     try {
       const { id } = req.params;
       const authUserId = req.userData._id;
-      const { page, limit } = req.body;
+      const { page, limit, username } = req.query;
 
-      const result = await this.getAllSupportingService.handle(id, authUserId, page, limit);
+      const result = await this.getAllSupportingService.handle(id, authUserId, page, limit, username || '');
 
       return res.status(200).json({ status: 'success', limit, page, results: result.length, data: result });
     } catch (e) {
@@ -206,8 +206,9 @@ export default class UserController {
     try {
       const id = req.userData._id;
       const data = req.body;
+      data.photo = req.file;
 
-      let result = await this.updateCurrentUserService.handle(id, req.body);
+      let result = await this.updateCurrentUserService.handle(id, data);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
@@ -269,7 +270,7 @@ export default class UserController {
 
   public async searchUser(req: any, res: Response, next: NextFunction) {
     try {
-      const { username } = req.body;
+      const { username } = req.query;
       const authUserId = req.userData._id;
 
       const result: any = await this.searchUserService.handle(username, authUserId);
