@@ -67,7 +67,8 @@ export default class PostController {
 
   public async getAllPost(req: any, res: Response, next: NextFunction) {
     try {
-      const result = await this.getAllPostService.handle(req.body);
+      const authUserId = req.userData._id;
+      const result = await this.getAllPostService.handle(authUserId, req.body);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
@@ -78,7 +79,9 @@ export default class PostController {
   public async getOnePost(req: any, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.getOnePostService.handle(id);
+      const authUserId = req.userData._id;
+
+      const result = await this.getOnePostService.handle(authUserId, id);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
@@ -102,8 +105,10 @@ export default class PostController {
   public async createResolution(req: any, res: Response, next: NextFunction) {
     try {
       const authUserId = req.userData._id;
+      const data = req.body;
+      data.photos = req.files;
 
-      const result = await this.createResolutionService.handle(req.body, authUserId);
+      const result = await this.createResolutionService.handle(data, authUserId);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {

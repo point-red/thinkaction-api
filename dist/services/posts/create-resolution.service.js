@@ -19,6 +19,18 @@ class CreateResolutionService {
     }
     handle(data, authUserId) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!data.categoryName) {
+                throw new Error('Enter a category name');
+            }
+            if (!data.dueDate || !Date.parse(data.dueDate)) {
+                throw new Error('Enter a valid date');
+            }
+            if (!data.caption) {
+                throw new Error('Enter a caption');
+            }
+            if (!['everyone', 'supporter', 'private'].includes(data.shareWith)) {
+                throw new Error('Choose a visibilty');
+            }
             const totalPosts = yield this.postRepository.aggregate([
                 {
                     $match: {

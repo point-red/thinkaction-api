@@ -1,12 +1,15 @@
 import { ObjectId } from 'mongodb';
 import { ResponseError } from '../../middleware/error.middleware';
 import { CommentRepository } from '../../repositories/comment.repository';
+import { PostRepository } from '../../repositories/post.repository';
 
 export default class DeleteCommentService {
   private commentRepository: CommentRepository;
+  private postRepository: PostRepository;
 
-  constructor(commentRepository: CommentRepository) {
+  constructor(commentRepository: CommentRepository, postRepository: PostRepository) {
     this.commentRepository = commentRepository;
+    this.postRepository = postRepository;
   }
 
   public async handle(id: string, authUserId: string) {
@@ -43,6 +46,8 @@ export default class DeleteCommentService {
         await this.commentRepository.delete(data.toString());
       });
     }
+
+    await this.postRepository.deleteCommentCount(comment.postId);
 
     return await this.commentRepository.delete(id);
   }

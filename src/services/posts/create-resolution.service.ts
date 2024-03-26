@@ -4,6 +4,8 @@ import { DocInterface } from '../../entities/docInterface';
 import { ResponseError } from '../../middleware/error.middleware';
 import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
+import fs from 'fs';
+import path from 'path';
 
 export default class CreateResolutionService {
   private postRepository: PostRepository;
@@ -13,6 +15,39 @@ export default class CreateResolutionService {
   }
 
   public async handle(data: DocInterface, authUserId: string) {
+
+    if (!data.categoryName) {
+      throw new Error('Enter a category name');
+    }
+    if (!data.dueDate || !Date.parse(data.dueDate)) {
+      throw new Error('Enter a valid date');
+    }
+    if (!data.caption) {
+      throw new Error('Enter a caption');
+    }
+    if (!['everyone', 'supporter', 'private'].includes(data.shareWith)) {
+      throw new Error('Choose a visibilty');
+    }
+    
+    const photos = data.photos;
+    data.photo = [];
+
+    if (photos?.length) {
+      photos.forEach((photo: any) => {
+        const _path = photo.path;
+        if (_path) {
+          if (!fs.existsSync(path.join(__dirname, '../../images/'))) {
+            fs.mkdirSync(path.join(__dirname, '../../images/'));
+          }
+          const newPath = path.join(__dirname, '../../images/' + photo.filename);
+          fs.renameSync(_path, newPath);
+          data.photo.push('images/' + photo.filename);
+        }
+      });
+    } else {
+      data.photo = null;
+    }
+
     const totalPosts: any = await this.postRepository.aggregate([
       {
         $match: {

@@ -16,7 +16,10 @@ import GetOnePostService from '../../services/posts/get-one.service';
 import GetAllLikePostService from '../../services/posts/get-all-like.service';
 import GetMonthlyReportService from '../../services/posts/get-monthly-report.service';
 import GetYearReportService from '../../services/posts/get-year-report.service';
+import multer from 'multer';
+import os from 'os';
 
+const upload = multer({ dest: os.tmpdir() });
 const router = Router();
 const postRepository = new PostRepository();
 const getAllPost = new GetAllPostService(postRepository);
@@ -60,7 +63,7 @@ router.get('/:id', verifyUser, (req, res, next) => postController.getOnePost(req
 
 router.get('/:id/like', verifyUser, (req, res, next) => postController.getAllLikePost(req, res, next));
 
-router.post('/resolutions', verifyUser, (req, res, next) => postController.createResolution(req, res, next));
+router.post('/resolutions', verifyUser, upload.array('photo[]'), (req, res, next) => postController.createResolution(req, res, next));
 
 router.post('/weeklyGoals', verifyUser, (req, res, next) => postController.createWeeklyGoals(req, res, next));
 

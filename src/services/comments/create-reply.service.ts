@@ -4,12 +4,15 @@ import { DocInterface } from '../../entities/docInterface';
 import { ResponseError } from '../../middleware/error.middleware';
 import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
+import { PostRepository } from '../../repositories/post.repository';
 
 export default class CreateReplyCommentService {
   private commentRepository: CommentRepository;
+  private postRepository: PostRepository;
 
-  constructor(commentRepository: CommentRepository) {
+  constructor(commentRepository: CommentRepository, postRepository: PostRepository) {
     this.commentRepository = commentRepository;
+    this.postRepository = postRepository;
   }
 
   public async handle(data: DocInterface, id: string) {
@@ -24,6 +27,8 @@ export default class CreateReplyCommentService {
       createdDate: new Date(),
       isUpdating: data.isUpdating || false,
     });
+
+    await this.postRepository.addCommentCount(data.postId);
 
     let commentData: any = commentEntity.CheckData();
 

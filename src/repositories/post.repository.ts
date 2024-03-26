@@ -20,11 +20,19 @@ export class PostRepository extends Database {
   }
 
   public async update2(id: string, authUserId: string) {
-    return await this.collection.updateOne({ _id: new ObjectId(id) }, { $push: { like: new ObjectId(authUserId) }, $inc: { likeCount: 1 } });
+    return await this.collection.updateOne({ _id: new ObjectId(id) }, { $push: { like: new ObjectId(authUserId) } as any, $inc: { likeCount: 1 } });
+  }
+
+  public async addCommentCount(id: string) {
+    return await this.collection.updateOne({ _id: new ObjectId(id) }, { $inc: { commentCount: 1 } });
+  }
+
+  public async deleteCommentCount(id: string) {
+    return await this.collection.updateOne({ _id: new ObjectId(id) }, { $dec: { commentCount: 1 } });
   }
 
   public async update3(id: string, authUserId: string) {
-    return await this.collection.updateOne({ _id: new ObjectId(id) }, { $pull: { like: new ObjectId(authUserId) }, $inc: { likeCount: -1 } });
+    return await this.collection.updateOne({ _id: new ObjectId(id) }, { $pull: { like: new ObjectId(authUserId) } as any, $inc: { likeCount: -1 } });
   }
 
   public async aggregate(pipeline: any) {

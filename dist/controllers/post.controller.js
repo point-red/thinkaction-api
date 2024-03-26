@@ -60,7 +60,7 @@ class PostController {
                 const { id } = req.params;
                 const authUserId = req.userData._id;
                 const result = yield this.getAllLikePostService.handle(id, authUserId);
-                return res.status(200).json({ status: 'success', likeCount: result.length, data: result });
+                return res.status(200).json({ status: 'success', limit: 10, page: 1, likeCount: result.length, data: result });
             }
             catch (e) {
                 next(e);

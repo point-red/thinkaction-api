@@ -8,11 +8,11 @@ export default class GetAllSupportingService {
     this.userRepository = userRepository;
   }
 
-  public async handle(id: string, authUserId: string, page: number, limit: number) {
+  public async handle(id: string, authUserId: string, page: number, limit: number, username: string) {
     const skip = (page - 1) * limit;
 
     const pipeline = [
-      { $match: { _id: new ObjectId(id) } },
+      { $match: { _id: new ObjectId(id), username: { $regex: username } } },
       { $unwind: '$supporting' },
       { $skip: +skip },
       { $limit: +limit },

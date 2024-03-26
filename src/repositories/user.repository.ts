@@ -97,7 +97,7 @@ export class UserRepository extends Database {
     return await this.collection.updateOne(
       { _id: new ObjectId(id) },
       {
-        $pull: { supporter: new ObjectId(authUserId) },
+        $pull: { supporter: new ObjectId(authUserId) } as any,
         $inc: { supporterCount: -1 },
       }
     );
@@ -107,7 +107,7 @@ export class UserRepository extends Database {
     return await this.collection.updateOne(
       { _id: new ObjectId(authUserId) },
       {
-        $pull: { supporting: new ObjectId(id) },
+        $pull: { supporting: new ObjectId(id) } as any,
         $inc: { supportingCount: -1 },
       }
     );
@@ -118,7 +118,7 @@ export class UserRepository extends Database {
       { _id: new ObjectId(id) },
       {
         $addToSet: { supporter: new ObjectId(authUserId) },
-        $pull: { request: new ObjectId(authUserId) },
+        $pull: { request: new ObjectId(authUserId) } as any,
         $inc: { supporterCount: 1, requestCount: -1 },
       }
     );
@@ -128,7 +128,7 @@ export class UserRepository extends Database {
     return await this.collection.updateOne(
       { _id: new ObjectId(id) },
       {
-        $pull: { request: new ObjectId(authUserId) },
+        $pull: { request: new ObjectId(authUserId) } as any,
         $inc: { requestCount: -1 },
       }
     );
@@ -143,11 +143,11 @@ export class UserRepository extends Database {
   }
 
   public async updateOne10(id: string) {
-    return await this.collection.updateOne({ notification: new ObjectId(id) }, { $pull: { notification: new ObjectId(id) } });
+    return await this.collection.updateOne({ notification: new ObjectId(id) }, { $pull: { notification: new ObjectId(id) } as any });
   }
 
   public async updateOne11(id: string, data: DocInterface) {
-    return await this.collection.updateOne({ _id: new ObjectId(id) }, { $push: { categoryResolution: data } });
+    return await this.collection.updateOne({ _id: new ObjectId(id) }, { $push: { categoryResolution: data } as any });
   }
 
   public async updateOne12(id: string, data: DocInterface) {

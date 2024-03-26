@@ -56,6 +56,7 @@ class GetAllLikePostService {
                         isPublic: 1,
                     },
                 },
+                { $limit: 10 },
             ];
             const allPost = yield this.postRepository.aggregate(pipeline);
             return allPost;
