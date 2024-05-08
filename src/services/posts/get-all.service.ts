@@ -45,6 +45,17 @@ export default class GetAllPostService {
         },
       },
       {
+        $match: {
+          $expr: {
+            $cond: {
+              if: { $ne: [data.categoryResolutionId, null] },
+              then: { $eq: ['$categoryResolutionId', new ObjectId(data.categoryResolutionId as string)] },
+              else: true,
+            },
+          },
+        },
+      },
+      {
         $lookup: {
           from: 'users',
           localField: 'userId',

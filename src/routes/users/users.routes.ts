@@ -20,11 +20,13 @@ import GetHistoryService from '../../services/users/get-history.service';
 import DeleteHistoryService from '../../services/users/delete-history.service';
 import multer from 'multer';
 import os from 'os';
+import { NotificationRepository } from '../../repositories/notification.repository';
 
 const upload = multer({ dest: os.tmpdir() });
 
 const router = Router();
 const userRepository = new UserRepository();
+const notificationRepository = new NotificationRepository();
 const createUser = new CreateUserService(userRepository);
 const updateMyPasswordUser = new UpdateMyPasswordUserService(userRepository);
 const getOneUser = new GetOneUserService(userRepository);
@@ -35,8 +37,8 @@ const getCurrentUserNotification = new GetCurrentUserNotificationService(userRep
 const updateCurrentUser = new UpdateCurrentUserService(userRepository);
 const supportAnotherUser = new SupportAnotherUserService(userRepository);
 const unsupportAnotherUser = new UnsupportAnotherUserService(userRepository);
-const acceptSupportRequest = new AcceptSupportRequestService(userRepository);
-const rejectSupportRequest = new RejectSupportRequestService(userRepository);
+const acceptSupportRequest = new AcceptSupportRequestService(userRepository, notificationRepository);
+const rejectSupportRequest = new RejectSupportRequestService(userRepository, notificationRepository);
 const searchUser = new SearchUserService(userRepository);
 const getHistory = new GetHistoryService(userRepository);
 const deleteHistory = new DeleteHistoryService(userRepository);

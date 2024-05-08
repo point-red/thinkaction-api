@@ -5,6 +5,7 @@ import { ResponseError } from '../../middleware/error.middleware';
 import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
 import UpdateResolutionsService from './update-resolution.service';
+import Uploader from '../uploader';
 
 export default class UpdateCompleteGoalsService {
   private postRepository: PostRepository;
@@ -15,6 +16,12 @@ export default class UpdateCompleteGoalsService {
 
   public async handle(data: DocInterface, authUserId: string, id: string) {
     const post = await this.postRepository.readOne(id);
+
+    const photos = data.photos;
+    const uploader = new Uploader(data.photos);
+    if (photos) {
+      data.photo = uploader.move();
+    }
 
     if (!post) {
       throw new ResponseError(400, 'Post not found');
@@ -34,7 +41,7 @@ export default class UpdateCompleteGoalsService {
       updatedDate: new Date(),
       shareWith: data.shareWith ?? post.shareWith,
       weeklyGoalId: data.weeklyGoalId ? new ObjectId(data.weeklyGoalId) : post.weeklyGoalId,
-      isComplete: data.isComplete ?? post.isComplete,
+      isComplete: (data.isComplete === 'true') ?? post.isComplete,
       isUpdating: true,
       createdDate: post.createdDate,
     });
@@ -63,7 +70,7 @@ export default class UpdateCompleteGoalsService {
     let updateResolutionsService = new UpdateResolutionsService(this.postRepository);
 
     const data2 = {
-      isComplete: dataPost.isComplete,
+      isComplete: dataPost.isComplete === 'true',
     };
 
     await updateResolutionsService.handle(data2, authUserId, categoryResolution[0]._id);

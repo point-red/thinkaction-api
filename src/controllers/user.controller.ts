@@ -244,10 +244,10 @@ export default class UserController {
 
   public async acceptSupportRequest(req: any, res: Response, next: NextFunction) {
     try {
-      const { userId } = req.body;
+      const { userId, notificationId } = req.body;
       const authUserId = req.userData._id;
 
-      const result: any = await this.acceptSupportRequestService.handle(userId, authUserId);
+      const result: any = await this.acceptSupportRequestService.handle(userId, authUserId, notificationId);
 
       return res.status(200).json({ status: 'success', message: 'Support request accepted successfully', data: result });
     } catch (e) {

@@ -5,6 +5,7 @@ import { ResponseError } from '../../middleware/error.middleware';
 import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
 import UpdateResolutionsService from './update-resolution.service';
+import Uploader from '../uploader';
 
 export default class CreateCompleteGoalsService {
   private postRepository: PostRepository;
@@ -14,6 +15,9 @@ export default class CreateCompleteGoalsService {
   }
 
   public async handle(data: DocInterface, authUserId: string) {
+    const uploader = new Uploader(data.photos);
+    data.photo = uploader.move();
+
     const postEntity = new PostEntity({
       userId: new ObjectId(authUserId),
       categoryResolutionId: new ObjectId(data.categoryResolutionId),
@@ -24,10 +28,10 @@ export default class CreateCompleteGoalsService {
       likeCount: 0,
       commentCount: 0,
       dueDate: new Date(data.dueDate),
-      updatedDate: data.updatedDate,
+      updatedDate: new Date(data.updatedDate),
       shareWith: data.shareWith,
-      weeklyGoalId: new ObjectId(data.weeklyGoalId),
-      isComplete: data.isComplete,
+      weeklyGoalId: new ObjectId(data.weeklyGoalId as string),
+      isComplete: data.isComplete === 'true',
       isUpdating: false,
       createdDate: new Date(),
     });
@@ -54,7 +58,7 @@ export default class CreateCompleteGoalsService {
     let updateResolutionsService = new UpdateResolutionsService(this.postRepository);
 
     const data2 = {
-      isComplete: data.isComplete,
+      isComplete: data.isComplete === 'true',
     };
 
     await updateResolutionsService.handle(data2, authUserId, categoryResolution[0]._id);

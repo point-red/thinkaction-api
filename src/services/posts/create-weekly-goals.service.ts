@@ -4,6 +4,9 @@ import { DocInterface } from '../../entities/docInterface';
 import { ResponseError } from '../../middleware/error.middleware';
 import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
+import path from 'path';
+import fs from 'fs';
+import Uploader from '../uploader';
 
 export default class CreateWeeklyGoalsService {
   private postRepository: PostRepository;
@@ -13,6 +16,13 @@ export default class CreateWeeklyGoalsService {
   }
 
   public async handle(data: DocInterface, authUserId: string) {
+    
+    const photos = data.photos;
+    const uploader = new Uploader(data.photos);
+    if (photos) {
+      data.photo = uploader.move();
+    }
+
     const postEntity = new PostEntity({
       userId: new ObjectId(authUserId),
       categoryResolutionId: new ObjectId(data.categoryResolutionId),

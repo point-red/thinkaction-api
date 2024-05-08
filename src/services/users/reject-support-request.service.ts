@@ -1,11 +1,14 @@
 import { ResponseError } from '../../middleware/error.middleware';
+import { NotificationRepository } from '../../repositories/notification.repository';
 import { UserRepository } from '../../repositories/user.repository';
 
 export default class RejectSupportRequestService {
   private userRepository: UserRepository;
+  private notificationRepository: NotificationRepository;
 
-  constructor(userRepository: UserRepository) {
+  constructor(userRepository: UserRepository, notificationRepository: NotificationRepository) {
     this.userRepository = userRepository;
+    this.notificationRepository = notificationRepository;
   }
 
   public async handle(id: string, authUserId: string) {

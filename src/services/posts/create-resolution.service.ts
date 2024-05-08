@@ -6,6 +6,7 @@ import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
 import fs from 'fs';
 import path from 'path';
+import Uploader from '../uploader';
 
 export default class CreateResolutionService {
   private postRepository: PostRepository;
@@ -30,22 +31,9 @@ export default class CreateResolutionService {
     }
     
     const photos = data.photos;
-    data.photo = [];
-
-    if (photos?.length) {
-      photos.forEach((photo: any) => {
-        const _path = photo.path;
-        if (_path) {
-          if (!fs.existsSync(path.join(__dirname, '../../images/'))) {
-            fs.mkdirSync(path.join(__dirname, '../../images/'));
-          }
-          const newPath = path.join(__dirname, '../../images/' + photo.filename);
-          fs.renameSync(_path, newPath);
-          data.photo.push('images/' + photo.filename);
-        }
-      });
-    } else {
-      data.photo = null;
+    const uploader = new Uploader(data.photos);
+    if (photos) {
+      data.photo = uploader.move();
     }
 
     const totalPosts: any = await this.postRepository.aggregate([

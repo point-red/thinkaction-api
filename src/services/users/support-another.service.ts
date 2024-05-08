@@ -30,6 +30,7 @@ export default class SupportAnotherUserService {
     if (userToSupport.isPublic) {
       const notification = await notificationRepository.create({
         type: 'message',
+        fromUserId: new ObjectId(authUser._id),
         message: `${authUser.username} has supported you`,
         date: new Date(),
       });
@@ -42,6 +43,7 @@ export default class SupportAnotherUserService {
     } else {
       const notification = await notificationRepository.create({
         type: 'request',
+        fromUserId: new ObjectId(authUser._id),
         message: `${authUser.username} wants to support you`,
         status: 'pending',
         date: new Date(),
