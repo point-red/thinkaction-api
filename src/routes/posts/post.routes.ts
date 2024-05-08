@@ -65,19 +65,19 @@ router.get('/:id/like', verifyUser, (req, res, next) => postController.getAllLik
 
 router.post('/resolutions', verifyUser, upload.array('photo[]'), (req, res, next) => postController.createResolution(req, res, next));
 
-router.post('/weeklyGoals', verifyUser, (req, res, next) => postController.createWeeklyGoals(req, res, next));
+router.post('/weeklyGoals', verifyUser, upload.array('photo[]'), (req, res, next) => postController.createWeeklyGoals(req, res, next));
 
-router.post('/completeGoals', verifyUser, (req, res, next) => postController.createCompleteGoals(req, res, next));
+router.post('/completeGoals', verifyUser, upload.array('photo[]'), (req, res, next) => postController.createCompleteGoals(req, res, next));
 
 router.post('/like', verifyUser, (req, res, next) => postController.likePost(req, res, next));
 
 router.post('/unlike', verifyUser, (req, res, next) => postController.unlikePost(req, res, next));
 
-router.patch('/:id/resolutions', verifyUser, (req, res, next) => postController.updateResolutions(req, res, next));
+router.patch('/:id/resolutions', verifyUser, upload.array('photo[]'), (req, res, next) => postController.updateResolutions(req, res, next));
 
-router.patch('/:id/weeklyGoals', verifyUser, (req, res, next) => postController.updateWeeklyGoals(req, res, next));
+router.patch('/:id/weeklyGoals', verifyUser, upload.array('photo[]'), (req, res, next) => postController.updateWeeklyGoals(req, res, next));
 
-router.patch('/:id/completeGoals', verifyUser, (req, res, next) => postController.updateCompleteGoals(req, res, next));
+router.patch('/:id/completeGoals', verifyUser, upload.array('photo[]'), (req, res, next) => postController.updateCompleteGoals(req, res, next));
 
 router.delete('/:id', verifyUser, (req, res, next) => postController.deletePost(req, res, next));
 

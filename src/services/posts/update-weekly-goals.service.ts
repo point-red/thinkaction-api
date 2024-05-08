@@ -4,6 +4,9 @@ import { DocInterface } from '../../entities/docInterface';
 import { ResponseError } from '../../middleware/error.middleware';
 import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
+import path from 'path';
+import fs from 'fs';
+import Uploader from '../uploader';
 
 export default class UpdateWeeklyGoalsService {
   private postRepository: PostRepository;
@@ -18,7 +21,27 @@ export default class UpdateWeeklyGoalsService {
     if (!post) {
       throw new ResponseError(400, 'Post not found');
     }
+    const photos = data.photos;
+    const uploader = new Uploader(data.photos);
+    if (photos) {
+      data.photo = uploader.move();
+    }
 
+    if (photos?.length) {
+      photos.forEach((photo: any) => {
+        const _path = photo.path;
+        if (_path) {
+          if (!fs.existsSync(path.join(__dirname, '../../images/'))) {
+            fs.mkdirSync(path.join(__dirname, '../../images/'));
+          }
+          const newPath = path.join(__dirname, '../../images/' + photo.filename);
+          fs.renameSync(_path, newPath);
+          data.photo.push('images/' + photo.filename);
+        }
+      });
+    } else {
+      data.photo = undefined;
+    }
     const postEntity = new PostEntity({
       _id: post._id,
       userId: new ObjectId(authUserId),

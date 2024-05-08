@@ -15,6 +15,12 @@ export class NotificationRepository extends Database {
     return await this.collection.findOne({ _id: new ObjectId(id) });
   }
 
+  public async update(id: string, data: DocInterface) {
+    return await this.collection.updateOne({ _id: new ObjectId(id) }, {
+      $set: data
+    });
+  }
+
   public async aggregate(pipeline: any) {
     return await this.collection.aggregate(pipeline).toArray();
   }

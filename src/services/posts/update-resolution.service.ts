@@ -4,6 +4,9 @@ import { DocInterface } from '../../entities/docInterface';
 import { ResponseError } from '../../middleware/error.middleware';
 import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
+import path from 'path';
+import fs from 'fs';
+import Uploader from '../uploader';
 
 export default class UpdateResolutionsService {
   private postRepository: PostRepository;
@@ -17,6 +20,11 @@ export default class UpdateResolutionsService {
 
     if (!post) {
       throw new ResponseError(400, 'Post not found');
+    }
+    const photos = data.photos;
+    const uploader = new Uploader(data.photos);
+    if (photos) {
+      data.photo = uploader.move();
     }
 
     const postEntity = new PostEntity({

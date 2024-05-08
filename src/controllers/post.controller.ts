@@ -68,7 +68,7 @@ export default class PostController {
   public async getAllPost(req: any, res: Response, next: NextFunction) {
     try {
       const authUserId = req.userData._id;
-      const result = await this.getAllPostService.handle(authUserId, req.body);
+      const result = await this.getAllPostService.handle(authUserId, req.query);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
@@ -119,8 +119,10 @@ export default class PostController {
   public async createWeeklyGoals(req: any, res: Response, next: NextFunction) {
     try {
       const authUserId = req.userData._id;
-
-      const result = await this.createWeeklyGoalsService.handle(req.body, authUserId);
+      const data = req.body;
+      data.photos = req.files;
+      
+      const result = await this.createWeeklyGoalsService.handle(data, authUserId);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
@@ -131,8 +133,10 @@ export default class PostController {
   public async createCompleteGoals(req: any, res: Response, next: NextFunction) {
     try {
       const authUserId = req.userData._id;
+      const data = req.body;
+      data.photos = req.files;
 
-      const result = await this.createCompleteGoalsService.handle(req.body, authUserId);
+      const result = await this.createCompleteGoalsService.handle(data, authUserId);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
@@ -145,7 +149,10 @@ export default class PostController {
       const authUserId = req.userData._id;
       const { id } = req.params;
 
-      const result = await this.updateResolutionsService.handle(req.body, authUserId, id);
+      const data = req.body;
+      data.photos = req.files;
+      
+      const result = await this.updateResolutionsService.handle(data, authUserId, id);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
@@ -158,7 +165,10 @@ export default class PostController {
       const authUserId = req.userData._id;
       const { id } = req.params;
 
-      const result = await this.updateWeeklyGoalsService.handle(req.body, authUserId, id);
+      const data = req.body;
+      data.photos = req.files;
+      
+      const result = await this.updateWeeklyGoalsService.handle(data, authUserId, id);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
@@ -207,7 +217,7 @@ export default class PostController {
     try {
       const authUserId = req.userData._id;
 
-      const result = await this.getMonthlyReportService.handle(req.body, authUserId);
+      const result = await this.getMonthlyReportService.handle(req.query, authUserId);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
@@ -219,7 +229,7 @@ export default class PostController {
     try {
       const authUserId = req.userData._id;
 
-      const result = await this.getYearReportService.handle(req.body, authUserId);
+      const result = await this.getYearReportService.handle(req.query, authUserId);
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
