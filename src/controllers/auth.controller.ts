@@ -39,12 +39,13 @@ export default class AuthController {
       const token = jwt.sign(payload, secret, {
         expiresIn: process.env.JWT_EXPIRES,
       });
+
       const cookieOptions = {
         expiresIn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
         httpOnly: true,
       };
 
-      return res.json({
+      return res.cookie('jwt-token', token, cookieOptions).status(200).json({
         status: 'success',
         token: token,
         data: {

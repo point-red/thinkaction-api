@@ -13,19 +13,15 @@ interface UserData {
   role: string;
 }
 
-interface ValidationRequest extends Request {
-  userData: UserData;
-}
-
 export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
-  const validationReq = req as ValidationRequest;
+  const validationReq = req;
   const { authorization } = validationReq.headers;
 
-  if (!authorization) {
+  if (!authorization && !req.cookies['jwt-token']) {
     throw new ResponseError(401, 'Please loggin to get access');
   }
 
-  const token = authorization.split(' ')[1];
+  const token = authorization?.split(' ')[1] || req.cookies['jwt-token'];
   const secret = process.env.JWT_SECRET!;
 
   try {
@@ -42,7 +38,7 @@ export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const adminOnly = (req: Request, res: Response, next: NextFunction) => {
-  const validationReq = req as ValidationRequest;
+  const validationReq = req;
   if (validationReq.userData.role !== 'admin') {
     throw new ResponseError(403, "You don't have permission");
   }

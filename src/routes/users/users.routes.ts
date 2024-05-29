@@ -19,10 +19,9 @@ import SearchUserService from '../../services/users/search.service';
 import GetHistoryService from '../../services/users/get-history.service';
 import DeleteHistoryService from '../../services/users/delete-history.service';
 import multer from 'multer';
-import os from 'os';
 import { NotificationRepository } from '../../repositories/notification.repository';
 
-const upload = multer({ dest: os.tmpdir() });
+const upload = multer();
 
 const router = Router();
 const userRepository = new UserRepository();
@@ -64,6 +63,8 @@ const authController = new AuthController(userRepository);
 router.post('/register', (req, res, next) => userController.createUser(req, res, next));
 
 router.post('/login', (req, res, next) => authController.login(req, res, next));
+
+router.get('/get', verifyUser, (req, res, next) => userController.getAuthUser(req, res, next))
 
 router.post('/support', verifyUser, (req, res, next) => userController.supportAnotherUser(req, res, next));
 

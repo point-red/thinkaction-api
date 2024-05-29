@@ -17,9 +17,8 @@ import GetAllLikePostService from '../../services/posts/get-all-like.service';
 import GetMonthlyReportService from '../../services/posts/get-monthly-report.service';
 import GetYearReportService from '../../services/posts/get-year-report.service';
 import multer from 'multer';
-import os from 'os';
 
-const upload = multer({ dest: os.tmpdir() });
+const upload = multer();
 const router = Router();
 const postRepository = new PostRepository();
 const getAllPost = new GetAllPostService(postRepository);

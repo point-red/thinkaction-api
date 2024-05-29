@@ -70,6 +70,14 @@ export default class UserController {
     this.deleteHistoryService = deleteHistoryService;
   }
 
+  public async getAuthUser (req: Request, res: Response, next: NextFunction) {
+    try {
+      res.status(200).json(req.userData)
+    } catch (e) {
+      next(e)
+    }
+  }
+
   public async createUser(req: Request, res: Response, next: NextFunction) {
     try {
       const data = req.body;
@@ -93,7 +101,7 @@ export default class UserController {
         httpOnly: true,
       };
 
-      return res.status(200).json({ status: 'success', token: token, data: { user: result } });
+      return res.cookie('jwt-token', token, cookieOptions).status(200).json({ status: 'success', token: token, data: { user: result } });
     } catch (e) {
       next(e);
     }
