@@ -16,6 +16,7 @@ import RejectSupportRequestService from '../services/users/reject-support-reques
 import SearchUserService from '../services/users/search.service';
 import GetHistoryService from '../services/users/get-history.service';
 import DeleteHistoryService from '../services/users/delete-history.service';
+import GetImageService from '../services/images/get-image.service';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ export default class UserController {
   private searchUserService: SearchUserService;
   private getHistoryService: GetHistoryService;
   private deleteHistoryService: DeleteHistoryService;
+  private getImageService: GetImageService
 
   constructor(
     createUserService: CreateUserService,
@@ -51,7 +53,8 @@ export default class UserController {
     rejectSupportRequestService: RejectSupportRequestService,
     searchUserService: SearchUserService,
     getHistoryService: GetHistoryService,
-    deleteHistoryService: DeleteHistoryService
+    deleteHistoryService: DeleteHistoryService,
+    getImageService: GetImageService
   ) {
     this.createUserService = createUserService;
     this.updateMyPasswordUserService = updateMyPasswordUserService;
@@ -68,6 +71,15 @@ export default class UserController {
     this.searchUserService = searchUserService;
     this.getHistoryService = getHistoryService;
     this.deleteHistoryService = deleteHistoryService;
+    this.getImageService = getImageService
+  }
+
+  public async getAuthUser (req: Request, res: Response, next: NextFunction) {
+    try {
+      res.status(200).json(req.userData)
+    } catch (e) {
+      next(e)
+    }
   }
 
   public async createUser(req: Request, res: Response, next: NextFunction) {
@@ -93,7 +105,7 @@ export default class UserController {
         httpOnly: true,
       };
 
-      return res.status(200).json({ status: 'success', token: token, data: { user: result } });
+      return res.cookie('jwt-token', token, cookieOptions).status(200).json({ status: 'success', token: token, data: { user: result } });
     } catch (e) {
       next(e);
     }
@@ -134,6 +146,8 @@ export default class UserController {
       const authUserId = req.userData._id;
 
       const result = await this.getOneUserService.handle(id, authUserId);
+
+      result.photo = await this.getImageService.handle(result.photo)
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
@@ -206,9 +220,10 @@ export default class UserController {
     try {
       const id = req.userData._id;
       const data = req.body;
-      data.photo = req.file;
 
       let result = await this.updateCurrentUserService.handle(id, data);
+
+      result.photo = await this.getImageService.handle(result.photo)
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {

@@ -17,10 +17,15 @@ import GetAllLikePostService from '../../services/posts/get-all-like.service';
 import GetMonthlyReportService from '../../services/posts/get-monthly-report.service';
 import GetYearReportService from '../../services/posts/get-year-report.service';
 import multer from 'multer';
-import os from 'os';
+import ImageEntity from '../../entities/image.entity';
+import GetImageService from '../../services/images/get-image.service';
 
-const upload = multer({ dest: os.tmpdir() });
+const upload = multer();
 const router = Router();
+
+const s3 = new ImageEntity()
+const getImage = new GetImageService(s3)
+
 const postRepository = new PostRepository();
 const getAllPost = new GetAllPostService(postRepository);
 const getOnePost = new GetOnePostService(postRepository);
@@ -50,7 +55,8 @@ const postController = new PostController(
   unlikePost,
   getMonthlyReport,
   getYearReport,
-  deletePost
+  deletePost,
+  getImage
 );
 
 router.get('/', verifyUser, (req, res, next) => postController.getAllPost(req, res, next));

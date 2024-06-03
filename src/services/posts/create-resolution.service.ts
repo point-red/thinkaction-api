@@ -49,7 +49,15 @@ export default class CreateResolutionService {
       },
     ]);
 
-    if (totalPosts.length === 7 || totalPosts.length > 7) {
+    const totalSameResolutions: any = this.postRepository.aggregate([
+      {
+        $match: {
+          
+        }
+      }
+    ])
+
+    if (totalPosts.length >= 7) {
       throw new ResponseError(400, 'Resolutions cannot be more than 7');
     }
 

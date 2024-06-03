@@ -11,7 +11,10 @@ import { router } from './routes';
 
 const app: Application = express();
 
-app.use(cors());
+app.use(cors({
+  credentials: true,
+  origin: process.env.APP_URL
+}));
 app.use(cookieParser());
 app.use(json());
 app.use(urlencoded({ extended: true }));

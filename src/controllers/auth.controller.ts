@@ -39,12 +39,13 @@ export default class AuthController {
       const token = jwt.sign(payload, secret, {
         expiresIn: process.env.JWT_EXPIRES,
       });
+
       const cookieOptions = {
         expiresIn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
         httpOnly: true,
       };
 
-      return res.json({
+      return res.cookie('jwt-token', token, cookieOptions).status(200).json({
         status: 'success',
         token: token,
         data: {
@@ -69,7 +70,7 @@ export default class AuthController {
 
   public async logout(req: Request, res: Response) {
     try {
-      return res.status(200).json({ status: 'success', message: 'Successfully logged out.' });
+      return res.clearCookie('jwt-token').status(200).json({ status: 'success', message: 'Successfully logged out.' });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: 'Internal Server Error' });

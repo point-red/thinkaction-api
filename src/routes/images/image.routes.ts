@@ -2,17 +2,21 @@ import { Router } from "express";
 import { verifyUser } from "../../middleware/auth.middleware";
 import path from "path";
 import fs from 'fs';
+import ImageController from "../../controllers/image.controller";
+import GetImageService from "../../services/images/get-image.service";
+import UploadImageService from "../../services/images/upload-image.service";
+import ImageEntity from "../../entities/image.entity";
+import multer from "multer";
 
+const upload = multer()
 const router = Router();
 
-router.get('/:id', (req, res, next) => {
+const s3 = new ImageEntity()
+const getImageService = new GetImageService(s3)
+const uploadImageService = new UploadImageService(s3)
+const imageController = new ImageController(getImageService, uploadImageService)
 
-    const _path = path.join(__dirname, '../../images/' + req.params.id);
-    if (fs.existsSync(_path)) {
-        return res.download(_path);
-    }
-
-    return res.status(404).end();
-});
+router.get('/:key', (req, res, next) => imageController.getImage(req, res, next));
+router.post('/upload', upload.single('image'), (req, res, next) => imageController.uploadImage(req, res, next))
 
 export default router;

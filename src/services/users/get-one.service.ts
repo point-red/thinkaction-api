@@ -37,11 +37,11 @@ export default class GetOneUserService {
           isPublic: 1,
           supporterCount: 1,
           supportingCount: 1,
-          notificationCount: 1,
-          requestCount: 1,
           goalsPerformance: 1,
           isAuthenticatedUser: 1,
           isSupporting: 1,
+          notificationCount: isAuthenticatedUser ? 1 : 0,
+          requestCount: isAuthenticatedUser ? 1 : 0,
         },
       },
     ];
