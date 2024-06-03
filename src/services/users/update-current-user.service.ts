@@ -18,28 +18,7 @@ export default class UpdateCurrentUserService {
     if (!userNow) {
       throw new ResponseError(404, 'User not found');
     }
-
-    const photo = data.photo;
-    if (photo) {
-      const _path = photo.path;
-      if (_path) {
-        if (!fs.existsSync(path.join(__dirname, '../../images/'))) {
-          fs.mkdirSync(path.join(__dirname, '../../images/'));
-        }
-        if (userNow.photo) {
-          const photoNow = path.join(__dirname, '../../', userNow.photo);
-          if (fs.existsSync(photoNow)) {
-            fs.rmSync(photoNow);
-          }
-        }
-        const newPath = path.join(__dirname, '../../images/' + photo.filename);
-        fs.renameSync(_path, newPath);
-        data.photo = 'images/' + photo.filename;
-      }
-    } else {
-      data.photo = userNow.photo;
-    }
-
+    
     if (typeof data.isPublic === 'string') {
       data.isPublic = data.isPublic === 'true';
     }

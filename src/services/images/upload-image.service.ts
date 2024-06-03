@@ -11,11 +11,11 @@ export default class UploadImageService {
   async handle(file: Express.Multer.File) {
     const command = new PutObjectCommand({
       Bucket: this.s3.bucket,
-      Key: file.filename,
+      Key: file.originalname,
       Body: file.buffer
     })
 
     await this.s3.client.send(command)
-    return true
+    return command.input.Key
   }
 }

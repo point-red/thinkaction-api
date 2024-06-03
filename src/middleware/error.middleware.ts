@@ -24,6 +24,8 @@ const errorMiddleware = async (err: ResponseError | Error, req: Request, res: Re
     return;
   }
 
+  console.log(err)
+
   if (err instanceof ResponseError) {
     res
       .status(err.status)

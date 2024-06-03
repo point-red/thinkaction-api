@@ -20,10 +20,16 @@ import GetHistoryService from '../../services/users/get-history.service';
 import DeleteHistoryService from '../../services/users/delete-history.service';
 import multer from 'multer';
 import { NotificationRepository } from '../../repositories/notification.repository';
+import ImageEntity from '../../entities/image.entity';
+import GetImageService from '../../services/images/get-image.service';
 
 const upload = multer();
 
 const router = Router();
+
+const s3 = new ImageEntity()
+const getImage = new GetImageService(s3)
+
 const userRepository = new UserRepository();
 const notificationRepository = new NotificationRepository();
 const createUser = new CreateUserService(userRepository);
@@ -56,7 +62,8 @@ const userController = new UserController(
   rejectSupportRequest,
   searchUser,
   getHistory,
-  deleteHistory
+  deleteHistory,
+  getImage
 );
 const authController = new AuthController(userRepository);
 

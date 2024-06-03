@@ -18,7 +18,7 @@ export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
   const { authorization } = validationReq.headers;
 
   if (!authorization && !req.cookies['jwt-token']) {
-    throw new ResponseError(401, 'Please loggin to get access');
+    throw new ResponseError(401, 'Please login to get access');
   }
 
   const token = authorization?.split(' ')[1] || req.cookies['jwt-token'];

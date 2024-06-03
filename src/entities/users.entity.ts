@@ -15,7 +15,7 @@ export interface UserInterface {
   password: string;
   fullname?: string;
   bio?: string;
-  photo?: string;
+  photo?: Buffer;
   supporter?: Array<string> | string;
   supporting?: Array<string> | string;
   request?: Array<string> | string;

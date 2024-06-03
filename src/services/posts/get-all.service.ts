@@ -1,6 +1,7 @@
 import { PostRepository } from '../../repositories/post.repository';
 import { DocInterface } from '../../entities/docInterface';
 import { ObjectId } from 'mongodb';
+import GetImageService from '../images/get-image.service';
 
 export default class GetAllPostService {
   private postRepository: PostRepository;
@@ -68,9 +69,7 @@ export default class GetAllPostService {
           userInfo: {
             $arrayElemAt: ['$userInfo', 0],
           },
-          likedByCurrent: {
-            $in: [new ObjectId(authUserId), "$like"]
-          }
+          likedByCurrent: new ObjectId(authUserId)
         },
       },
       {
@@ -97,6 +96,12 @@ export default class GetAllPostService {
             resolution: 1,
             categoryResolution: 1,
           },
+        },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: 'totalCount' }],
+          data: [{ $skip: (Number(data.page) - 1) * Number(data.limit) }, { $limit: Number(data.limit) }],
         },
       },
     ];
@@ -130,6 +135,12 @@ export default class GetAllPostService {
 
     const allPost = await this.postRepository.aggregate(pipeline);
 
-    return allPost;
+
+    return {
+      total: allPost[0].metadata[0].totalCount, 
+      page: Number(data.page), 
+      limit: Number(data.limit),
+      data: allPost[0].data
+    }
   }
 }

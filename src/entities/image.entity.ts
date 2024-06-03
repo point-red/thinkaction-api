@@ -17,7 +17,7 @@ export default class ImageEntity {
   private generateS3Client() {
     return new S3Client({
       region: 'ap-shouteast-1',
-      endpoint: process.env.S3_ENDPOINT as string,
+      useArnRegion: true,
       credentials: {
         accessKeyId: process.env.S3_ACCESS_KEY as string,
         secretAccessKey: process.env.S3_SECRET_ACCESS_KEY as string

@@ -23,9 +23,13 @@ export default class ImageController {
 
   public async uploadImage(req: Request, res: Response, next: NextFunction) {
     try {
-      await this.uploadImageService.handle(req.file as Express.Multer.File)
-
-      res.status(200).json({ success: true })
+      if (req.file) {
+        const key = await this.uploadImageService.handle(req.file as Express.Multer.File)
+  
+        res.status(200).json({ key })
+      } else {
+        res.status(400).json({ errors: 'Image not attached' })
+      }
     } catch (e) {
       next(e)
     }

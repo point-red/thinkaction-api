@@ -12,7 +12,7 @@ const verifyUser = (req, res, next) => {
     const validationReq = req;
     const { authorization } = validationReq.headers;
     if (!authorization) {
-        throw new error_middleware_1.ResponseError(401, 'Please loggin to get access');
+        throw new error_middleware_1.ResponseError(401, 'Please login to get access');
     }
     const token = authorization.split(' ')[1];
     const secret = process.env.JWT_SECRET;
