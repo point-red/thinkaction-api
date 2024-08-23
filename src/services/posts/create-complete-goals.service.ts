@@ -6,6 +6,7 @@ import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
 import UpdateResolutionsService from './update-resolution.service';
 import Uploader from '../uploader';
+import { ImageService } from '../images/image.service';
 
 export default class CreateCompleteGoalsService {
   private postRepository: PostRepository;
@@ -15,8 +16,10 @@ export default class CreateCompleteGoalsService {
   }
 
   public async handle(data: DocInterface, authUserId: string) {
-    const uploader = new Uploader(data.photos);
-    data.photo = uploader.move();
+    const photos = data.photos;
+    if (photos) {
+      data.photo = await ImageService.move(photos);
+    }
 
     const postEntity = new PostEntity({
       userId: new ObjectId(authUserId),

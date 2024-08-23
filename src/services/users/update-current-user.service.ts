@@ -4,6 +4,7 @@ import { DocInterface } from '../../entities/docInterface';
 import { ResponseError } from '../../middleware/error.middleware';
 import fs from 'fs';
 import path from 'path';
+import { ImageService } from '../images/image.service';
 
 export default class UpdateCurrentUserService {
   private userRepository: UserRepository;
@@ -18,9 +19,13 @@ export default class UpdateCurrentUserService {
     if (!userNow) {
       throw new ResponseError(404, 'User not found');
     }
-    
+
     if (typeof data.isPublic === 'string') {
       data.isPublic = data.isPublic === 'true';
+    }
+
+    if (userNow.photo && data.photo) {
+      ImageService.remove(userNow.photo);
     }
 
     const userEntity = new UserEntity({
@@ -28,7 +33,7 @@ export default class UpdateCurrentUserService {
       username: data.username ?? userNow.username,
       password: userNow.password,
       fullname: data.fullname ?? userNow.fullname,
-      bio: data.bio ?? userNow.bio,
+      bio: data.bio ?? userNow.bio ?? '',
       photo: data.photo ?? userNow.photo,
       supporter: userNow.supporter,
       supporting: userNow.supporting,

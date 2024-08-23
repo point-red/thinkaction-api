@@ -4,19 +4,106 @@ import { ResponseError } from '../middleware/error.middleware';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { OAuth2Client } from 'google-auth-library';
+import { googleAuthConfig } from '../config/oauth';
+import { ObjectId } from 'mongodb';
+import CreateUserService from '../services/users/create.service';
 
 dotenv.config();
 
 export default class AuthController {
-  private userRepository;
 
-  constructor(userRepository: UserRepository) {
+  private userRepository: UserRepository;
+  private createUserService: CreateUserService;
+
+  constructor(createUserService: CreateUserService, userRepository: UserRepository) {
+    this.createUserService = createUserService;
     this.userRepository = userRepository;
+  }
+
+  // public async googleGetAuthUrl(req: Request, res: Response, next: NextFunction) {
+  //   try {
+  //     const googleAuth = new GoogleAuth();
+  //     const callbackUrl = req.query.callback as string;
+  //     const url = googleAuth.getUrl(['profile', 'email'], callbackUrl);
+
+  //     return res.status(200).json(url);
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
+
+  // public async googleDriveGetAuthUrl(req: Request, res: Response, next: NextFunction) {
+  //   throw new Error("Method not implemented.");
+  // }
+  public async googleOauthCallback(req: Request, res: Response, next: NextFunction) {
+    const client = new OAuth2Client(googleAuthConfig.clientId, googleAuthConfig.clientSecret, googleAuthConfig.redirectUri);
+    if (req.body.code) {
+      req.body.credential = (await client.getToken(req.body.code))?.tokens?.id_token;
+    }
+    const credentials = req.body.credential;
+    const ticket = await client.verifyIdToken({
+      idToken: credentials,
+    })
+
+    const payload = ticket.getPayload()
+    if (!payload?.email)
+      return res.status(403).json({ message: 'Forbidden' });
+
+    let user = await this.userRepository.getUserByEmail(payload.email);
+
+    if (!user?.email) {
+      user = await this.createUserService.handle({
+        username: payload.email,
+        email: payload.email,
+        fullname: payload.name,
+        photo: payload.picture,
+        password: Math.random().toFixed(32).substring(2)
+      });
+    }
+    const newPayload = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+    };
+
+    const secret = process.env.JWT_SECRET!;
+
+    const token = jwt.sign(newPayload, secret, {
+      expiresIn: process.env.JWT_EXPIRES,
+    });
+
+    const cookieOptions = {
+      expiresIn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+    };
+
+    return res.cookie('jwt-token', token, cookieOptions).status(200).json({
+      status: 'success',
+      token: token,
+      data: {
+        user: {
+          _id: user._id,
+          username: user.username,
+          fullname: user.fullname,
+          email: user.email,
+          bio: user.bio,
+          supporterCount: user.supporterCount,
+          supportingCount: user.supportingCount,
+          photo: user.photo,
+          categoryResolution: user.categoryResolution,
+          isPublic: user.isPublic,
+        },
+      },
+    });
   }
 
   public async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
+      if (!email || !password) {
+        throw new ResponseError(401, 'Email not found');
+      }
 
       const user = await this.userRepository.getUserByEmail(email.toLowerCase());
 

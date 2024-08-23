@@ -10,6 +10,26 @@ export default class GetOneUserService {
 
   public async handle(id: string, authUserId: string) {
     const isAuthenticatedUser = authUserId == id;
+    const project: Record<string, number> = {
+      _id: 1,
+      fullname: 1,
+      username: 1,
+      email: 1,
+      bio: 1,
+      photo: 1,
+      categoryResolution: 1,
+      isPublic: 1,
+      supporterCount: 1,
+      supportingCount: 1,
+      goalsPerformance: 1,
+      isAuthenticatedUser: 1,
+      isSupporting: 1,
+    }
+
+    if (isAuthenticatedUser) {
+      project.notificationCount = 1;
+      project.requestCount = 1;
+    }
 
     const pipeline = [
       { $match: { _id: new ObjectId(id) } },
@@ -19,30 +39,14 @@ export default class GetOneUserService {
           ...(isAuthenticatedUser
             ? {}
             : {
-                isSupporting: {
-                  $in: [new ObjectId(authUserId), '$supporter'],
-                },
-              }),
+              isSupporting: {
+                $in: [new ObjectId(authUserId), '$supporter'],
+              },
+            }),
         },
       },
       {
-        $project: {
-          _id: 1,
-          fullname: 1,
-          username: 1,
-          email: 1,
-          bio: 1,
-          photo: 1,
-          categoryResolution: 1,
-          isPublic: 1,
-          supporterCount: 1,
-          supportingCount: 1,
-          goalsPerformance: 1,
-          isAuthenticatedUser: 1,
-          isSupporting: 1,
-          notificationCount: isAuthenticatedUser ? 1 : 0,
-          requestCount: isAuthenticatedUser ? 1 : 0,
-        },
+        $project: project,
       },
     ];
 

@@ -1,12 +1,9 @@
 import { PostEntity } from '../../entities/posts.entity';
 import { PostRepository } from '../../repositories/post.repository';
 import { DocInterface } from '../../entities/docInterface';
-import { ResponseError } from '../../middleware/error.middleware';
 import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
-import path from 'path';
-import fs from 'fs';
-import Uploader from '../uploader';
+import { ImageService } from '../images/image.service';
 
 export default class CreateWeeklyGoalsService {
   private postRepository: PostRepository;
@@ -16,11 +13,10 @@ export default class CreateWeeklyGoalsService {
   }
 
   public async handle(data: DocInterface, authUserId: string) {
-    
+
     const photos = data.photos;
-    const uploader = new Uploader(data.photos);
     if (photos) {
-      data.photo = uploader.move();
+      data.photo = await ImageService.move(photos);
     }
 
     const postEntity = new PostEntity({

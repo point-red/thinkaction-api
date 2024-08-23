@@ -6,6 +6,7 @@ import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
 import UpdateResolutionsService from './update-resolution.service';
 import Uploader from '../uploader';
+import { ImageService } from '../images/image.service';
 
 export default class UpdateCompleteGoalsService {
   private postRepository: PostRepository;
@@ -18,9 +19,8 @@ export default class UpdateCompleteGoalsService {
     const post = await this.postRepository.readOne(id);
 
     const photos = data.photos;
-    const uploader = new Uploader(data.photos);
     if (photos) {
-      data.photo = uploader.move();
+      data.photo = await ImageService.move(photos);
     }
 
     if (!post) {

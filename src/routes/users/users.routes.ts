@@ -20,15 +20,14 @@ import GetHistoryService from '../../services/users/get-history.service';
 import DeleteHistoryService from '../../services/users/delete-history.service';
 import multer from 'multer';
 import { NotificationRepository } from '../../repositories/notification.repository';
-import ImageEntity from '../../entities/image.entity';
 import GetImageService from '../../services/images/get-image.service';
+import os from 'os';
 
-const upload = multer();
+const upload = multer({ dest: os.tmpdir() });
 
 const router = Router();
 
-const s3 = new ImageEntity()
-const getImage = new GetImageService(s3)
+const getImage = new GetImageService()
 
 const userRepository = new UserRepository();
 const notificationRepository = new NotificationRepository();
@@ -65,10 +64,9 @@ const userController = new UserController(
   deleteHistory,
   getImage
 );
-const authController = new AuthController(userRepository);
+const authController = new AuthController(createUser, userRepository);
 
 router.post('/register', (req, res, next) => userController.createUser(req, res, next));
-
 router.post('/login', (req, res, next) => authController.login(req, res, next));
 
 router.get('/get', verifyUser, (req, res, next) => userController.getAuthUser(req, res, next))
@@ -82,8 +80,6 @@ router.post('/request/accept', verifyUser, (req, res, next) => userController.ac
 router.post('/request/reject', verifyUser, (req, res, next) => userController.rejectSupportRequest(req, res, next));
 
 router.patch('/updateMyPassword', verifyUser, (req, res, next) => userController.updateMyPassword(req, res, next));
-
-router.get('/logout', (req, res, next) => authController.logout(req, res));
 
 router.get('/request', verifyUser, (req, res, next) => userController.getCurrentUserRequest(req, res, next));
 

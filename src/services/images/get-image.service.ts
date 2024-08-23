@@ -5,8 +5,8 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 export default class GetImageService {
   private s3: ImageEntity
 
-  constructor(s3: ImageEntity) {
-    this.s3 = s3
+  constructor() {
+    this.s3 = new ImageEntity();
   }
 
   async handle(Key: string) {

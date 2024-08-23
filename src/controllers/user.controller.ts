@@ -17,6 +17,7 @@ import SearchUserService from '../services/users/search.service';
 import GetHistoryService from '../services/users/get-history.service';
 import DeleteHistoryService from '../services/users/delete-history.service';
 import GetImageService from '../services/images/get-image.service';
+import { ImageService } from '../services/images/image.service';
 
 dotenv.config();
 
@@ -74,7 +75,7 @@ export default class UserController {
     this.getImageService = getImageService
   }
 
-  public async getAuthUser (req: Request, res: Response, next: NextFunction) {
+  public async getAuthUser(req: Request, res: Response, next: NextFunction) {
     try {
       res.status(200).json(req.userData)
     } catch (e) {
@@ -147,7 +148,7 @@ export default class UserController {
 
       const result = await this.getOneUserService.handle(id, authUserId);
 
-      result.photo = await this.getImageService.handle(result.photo)
+      // result.photo = await this.getImageService.handle(result.photo)
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {
@@ -220,10 +221,11 @@ export default class UserController {
     try {
       const id = req.userData._id;
       const data = req.body;
+      const photos = await ImageService.move(req.file);
+      data.photo = photos?.[0];
 
       let result = await this.updateCurrentUserService.handle(id, data);
-
-      result.photo = await this.getImageService.handle(result.photo)
+      // result.photo = await this.getImageService.handle(result.photo)
 
       return res.status(200).json({ status: 'success', data: result });
     } catch (e) {

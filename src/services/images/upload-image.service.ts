@@ -4,8 +4,8 @@ import ImageEntity from "../../entities/image.entity";
 export default class UploadImageService {
   private s3: ImageEntity
 
-  constructor(s3: ImageEntity) {
-    this.s3 = s3
+  constructor() {
+    this.s3 = new ImageEntity();
   }
 
   async handle(file: Express.Multer.File) {

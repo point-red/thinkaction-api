@@ -14,8 +14,8 @@ import GetAllLikePostService from '../services/posts/get-all-like.service';
 import GetMonthlyReportService from '../services/posts/get-monthly-report.service';
 import dotenv from 'dotenv';
 import GetYearReportService from '../services/posts/get-year-report.service';
-import GetImageService from '../services/images/get-image.service';
 import { PostInterface } from '../entities/posts.entity';
+import { Pagination } from '../utils/pagination';
 
 dotenv.config();
 
@@ -34,7 +34,6 @@ export default class PostController {
   private getAllLikePostService: GetAllLikePostService;
   private getMonthlyReportService: GetMonthlyReportService;
   private getYearReportService: GetYearReportService;
-  private getImageService: GetImageService
 
   constructor(
     getAllPostService: GetAllPostService,
@@ -51,7 +50,6 @@ export default class PostController {
     getMonthlyReportService: GetMonthlyReportService,
     getYearReportService: GetYearReportService,
     deletePostService: DeletePostService,
-    getImageService: GetImageService
   ) {
     this.createResolutionService = createResolutionService;
     this.createWeeklyGoalsService = createWeeklyGoalsService;
@@ -67,25 +65,28 @@ export default class PostController {
     this.getAllLikePostService = getAllLikePostService;
     this.getMonthlyReportService = getMonthlyReportService;
     this.getYearReportService = getYearReportService;
-    this.getImageService = getImageService
   }
 
   public async getAllPost(req: any, res: Response, next: NextFunction) {
     try {
       const authUserId = req.userData._id;
-      const result = await this.getAllPostService.handle(authUserId, req.query);
+      const result = await this.getAllPostService.handle(authUserId, Pagination.paginate(req.query));
 
-      result.data = await Promise.all(result.data.map(async (post: PostInterface) => ({
+      result.data = result.data.map((post: PostInterface) => ({
         ...post,
-        photo: await Promise.all((post?.photo || []).map(async (img: string) => (await this.getImageService.handle(img)))),
         categoryResolution: (post as Record<string, any>).userInfo.categoryResolution.find((cr: any) => cr._id === post.categoryResolutionId)?.name,
-        userInfo: {
-          ...(post as Record<string, any>).userInfo,
-          photo: (post as Record<string, any>).userInfo.photo ? await this.getImageService.handle((post as Record<string, any>).userInfo.photo) : ''
-        }
-      })))
+      }))
+      // result.data = await Promise.all(result.data.map(async (post: PostInterface) => ({
+      //   ...post,
+      //   photo: await Promise.all((post?.photo || []).map(async (img: string) => (await this.getImageService.handle(img)))),
+      //   categoryResolution: (post as Record<string, any>).userInfo.categoryResolution.find((cr: any) => cr._id === post.categoryResolutionId)?.name,
+      //   userInfo: {
+      //     ...(post as Record<string, any>).userInfo,
+      //     photo: (post as Record<string, any>).userInfo.photo ? await this.getImageService.handle((post as Record<string, any>).userInfo.photo) : ''
+      //   }
+      // })))
 
-      return res.status(200).json({ status: 'success', data: result });
+      return res.status(200).json({ status: 'success', data: result.data });
     } catch (e) {
       next(e);
     }
@@ -136,7 +137,7 @@ export default class PostController {
       const authUserId = req.userData._id;
       const data = req.body;
       data.photos = req.files;
-      
+
       const result = await this.createWeeklyGoalsService.handle(data, authUserId);
 
       return res.status(200).json({ status: 'success', data: result });
@@ -166,7 +167,7 @@ export default class PostController {
 
       const data = req.body;
       data.photos = req.files;
-      
+
       const result = await this.updateResolutionsService.handle(data, authUserId, id);
 
       return res.status(200).json({ status: 'success', data: result });
@@ -182,7 +183,7 @@ export default class PostController {
 
       const data = req.body;
       data.photos = req.files;
-      
+
       const result = await this.updateWeeklyGoalsService.handle(data, authUserId, id);
 
       return res.status(200).json({ status: 'success', data: result });

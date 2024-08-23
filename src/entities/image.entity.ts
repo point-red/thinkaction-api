@@ -6,14 +6,14 @@ export interface S3ImageObject {
 }
 
 export default class ImageEntity {
-  client: S3Client 
+  client: S3Client
   bucket: string
 
   constructor() {
     this.client = this.generateS3Client()
     this.bucket = process.env.S3_BUCKET as string
   }
-  
+
   private generateS3Client() {
     return new S3Client({
       region: 'ap-shouteast-1',

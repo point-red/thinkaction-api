@@ -1,7 +1,7 @@
 import { PostRepository } from '../../repositories/post.repository';
 import { DocInterface } from '../../entities/docInterface';
 import { ObjectId } from 'mongodb';
-import GetImageService from '../images/get-image.service';
+// import GetImageService from '../images/get-image.service';
 
 export default class GetAllPostService {
   private postRepository: PostRepository;
@@ -133,12 +133,14 @@ export default class GetAllPostService {
       pipeline.push(sortStage);
     }
 
+    console.log(JSON.stringify(pipeline));
+
     const allPost = await this.postRepository.aggregate(pipeline);
 
 
     return {
-      total: allPost[0].metadata[0].totalCount, 
-      page: Number(data.page), 
+      total: allPost[0].metadata[0].totalCount,
+      page: Number(data.page),
       limit: Number(data.limit),
       data: allPost[0].data
     }

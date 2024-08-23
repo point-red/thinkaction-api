@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import authApi from './auth/auth.routes';
 import userApi from './users/users.routes';
 import commentApi from './comments/comments.routes';
 import notifApi from './notifications/notifications.routes';
@@ -7,6 +8,7 @@ import imageApi from './images/image.routes';
 
 const router = Router();
 
+router.use('/auth', authApi);
 router.use('/users', userApi);
 router.use('/comments', commentApi);
 router.use('/notifications', notifApi);

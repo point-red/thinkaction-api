@@ -7,6 +7,7 @@ import { ObjectId } from 'mongodb';
 import fs from 'fs';
 import path from 'path';
 import Uploader from '../uploader';
+import { ImageService } from '../images/image.service';
 
 export default class CreateResolutionService {
   private postRepository: PostRepository;
@@ -29,11 +30,10 @@ export default class CreateResolutionService {
     if (!['everyone', 'supporter', 'private'].includes(data.shareWith)) {
       throw new Error('Choose a visibilty');
     }
-    
+
     const photos = data.photos;
-    const uploader = new Uploader(data.photos);
     if (photos) {
-      data.photo = uploader.move();
+      data.photo = await ImageService.move(photos);
     }
 
     const totalPosts: any = await this.postRepository.aggregate([
@@ -52,7 +52,7 @@ export default class CreateResolutionService {
     const totalSameResolutions: any = this.postRepository.aggregate([
       {
         $match: {
-          
+
         }
       }
     ])

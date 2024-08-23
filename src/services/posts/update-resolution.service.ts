@@ -7,6 +7,7 @@ import { ObjectId } from 'mongodb';
 import path from 'path';
 import fs from 'fs';
 import Uploader from '../uploader';
+import { ImageService } from '../images/image.service';
 
 export default class UpdateResolutionsService {
   private postRepository: PostRepository;
@@ -21,10 +22,10 @@ export default class UpdateResolutionsService {
     if (!post) {
       throw new ResponseError(400, 'Post not found');
     }
+
     const photos = data.photos;
-    const uploader = new Uploader(data.photos);
     if (photos) {
-      data.photo = uploader.move();
+      data.photo = await ImageService.replace(post.photo, photos);
     }
 
     const postEntity = new PostEntity({
