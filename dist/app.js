@@ -21,6 +21,7 @@ const error_middleware_1 = require("./middleware/error.middleware");
 dotenv_1.default.config();
 const routes_1 = require("./routes");
 const database_1 = __importDefault(require("./database/database"));
+const PORT = Number(process.env.PORT) || 5050;
 const init = () => __awaiter(void 0, void 0, void 0, function* () {
     yield database_1.default.init();
     const app = (0, express_1.default)();
@@ -36,6 +37,7 @@ const init = () => __awaiter(void 0, void 0, void 0, function* () {
     app.use('/', (req, res, next) => {
         res.json({});
     });
+    app.listen(PORT, () => console.log(`running on port ${PORT}`));
     return app;
 });
 exports.default = {
