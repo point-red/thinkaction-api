@@ -6,8 +6,9 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { OAuth2Client } from 'google-auth-library';
 import { googleAuthConfig } from '../config/oauth';
-import { ObjectId } from 'mongodb';
 import CreateUserService from '../services/users/create.service';
+import { getResponse } from '../utils/url';
+import { CloudStorage } from '../utils/cloud-storage';
 
 dotenv.config();
 
@@ -39,7 +40,12 @@ export default class AuthController {
   public async googleOauthCallback(req: Request, res: Response, next: NextFunction) {
     const client = new OAuth2Client(googleAuthConfig.clientId, googleAuthConfig.clientSecret, googleAuthConfig.redirectUri);
     if (req.body.code) {
-      req.body.credential = (await client.getToken(req.body.code))?.tokens?.id_token;
+      try {
+        req.body.credential = (await client.getToken(req.body.code))?.tokens?.id_token;
+      } catch (e) {
+        console.log(req.body);
+        return res.status(403).json({ message: "Login Failed" });
+      }
     }
     const credentials = req.body.credential;
     const ticket = await client.verifyIdToken({
@@ -53,11 +59,22 @@ export default class AuthController {
     let user = await this.userRepository.getUserByEmail(payload.email);
 
     if (!user?.email) {
+      let image: any = payload.picture;
+      if (image !== undefined) {
+        try {
+          const response = await getResponse(image);
+          image = await CloudStorage.send(response);
+          // await downloadImage(image, path.join(__dirname, '../images/' + filename))
+          // image = `images/${filename}`;
+        } catch (e) {
+          image = null;
+        }
+      }
       user = await this.createUserService.handle({
         username: payload.email,
         email: payload.email,
         fullname: payload.name,
-        photo: payload.picture,
+        photo: image,
         password: Math.random().toFixed(32).substring(2)
       });
     }

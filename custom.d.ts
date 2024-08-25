@@ -1,3 +1,5 @@
+import type { MongoClient } from "mongodb";
+
 interface UserData {
   _id: string;
   username: string;
@@ -10,4 +12,7 @@ declare namespace Express {
   export interface Request {
     userData: UserData
   }
+}
+declare global {
+  var mongodbClient: MongoClient
 }

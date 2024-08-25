@@ -1,3 +1,4 @@
+import { CloudStorage } from "../../utils/cloud-storage";
 import Uploader from "../uploader";
 // import GetImageService from "./get-image.service";
 // import UploadImageService from "./upload-image.service";
@@ -5,8 +6,14 @@ import fs from 'fs';
 
 export class ImageService {
   static async move(file: Express.Multer.File | Express.Multer.File[]): Promise<string[]> {
-    const uploader = new Uploader(file);
-    return await uploader.move();
+    // const url = ''
+    if (!Array.isArray(file)) {
+      return this.move([file]);
+    }
+    return await Promise.all(file.map(f => CloudStorage.move(f)));
+    // Local Save Configuration
+    // const uploader = new Uploader(file);
+    // return await uploader.move();
     // AWS Configuration
     // const uploadService = new UploadImageService();
     // if (Array.isArray(file)) {

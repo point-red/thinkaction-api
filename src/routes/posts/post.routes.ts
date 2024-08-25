@@ -19,7 +19,8 @@ import GetYearReportService from '../../services/posts/get-year-report.service';
 import multer from 'multer';
 import os from 'os';
 
-const upload = multer({ dest: os.tmpdir() });
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 const router = Router();
 
 const postRepository = new PostRepository();

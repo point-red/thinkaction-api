@@ -23,7 +23,8 @@ import { NotificationRepository } from '../../repositories/notification.reposito
 import GetImageService from '../../services/images/get-image.service';
 import os from 'os';
 
-const upload = multer({ dest: os.tmpdir() });
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 const router = Router();
 

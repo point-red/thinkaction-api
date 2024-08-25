@@ -25,7 +25,7 @@ export default class UpdateCurrentUserService {
     }
 
     if (userNow.photo && data.photo) {
-      ImageService.remove(userNow.photo);
+      // ImageService.remove(userNow.photo);
     }
 
     const userEntity = new UserEntity({
