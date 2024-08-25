@@ -11,6 +11,9 @@ export class CloudStorage {
 
   public static async move(file: Express.Multer.File) {
     try {
+      if (!file) {
+        return null;
+      }
       const boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW';
       const body = [
         `--${boundary}`,
