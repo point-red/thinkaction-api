@@ -21,7 +21,11 @@ export default class Database {
   }
 
   public static async init() {
-    let client = new MongoClient(Database.uri);
+    let client = new MongoClient(Database.uri, {
+      tlsAllowInvalidHostnames: true,
+      retryReads: true,
+      retryWrites: true,
+    });
     global.mongodbClient = client;
     client = await client.connect();
     console.log("Connected to MongoDB.");
