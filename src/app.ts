@@ -12,8 +12,12 @@ import Database from './database/database';
 const PORT: Number = Number(process.env.PORT) || 5050;
 
 const init = async () => {
-  await Database.init();
   const app: Application = express();
+
+  if (!global.mongodbClient) {
+    await Database.init();
+  }
+
   app.use(cors({
     credentials: true,
     origin: process.env.APP_URL
