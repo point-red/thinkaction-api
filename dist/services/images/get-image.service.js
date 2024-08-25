@@ -8,23 +8,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const error_middleware_1 = require("../../middleware/error.middleware");
-class RejectSupportRequestService {
-    constructor(userRepository, notificationRepository) {
-        this.userRepository = userRepository;
-        this.notificationRepository = notificationRepository;
+const client_s3_1 = require("@aws-sdk/client-s3");
+const image_entity_1 = __importDefault(require("../../entities/image.entity"));
+const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
+class GetImageService {
+    constructor() {
+        this.s3 = new image_entity_1.default();
     }
-    handle(id, authUserId) {
+    handle(Key) {
         return __awaiter(this, void 0, void 0, function* () {
-            const userToReject = yield this.userRepository.readOne(id);
-            if (!userToReject) {
-                throw new error_middleware_1.ResponseError(400, 'User not found or not requested');
-            }
-            yield this.userRepository.updateOne7(id, authUserId);
-            const updatedUser = yield this.userRepository.findOne4(id);
-            return updatedUser;
+            const command = new client_s3_1.GetObjectCommand({
+                Bucket: this.s3.bucket,
+                Key
+            });
+            const data = yield (0, s3_request_presigner_1.getSignedUrl)(this.s3.client, command, { expiresIn: 36000 });
+            return data;
         });
     }
 }
-exports.default = RejectSupportRequestService;
+exports.default = GetImageService;

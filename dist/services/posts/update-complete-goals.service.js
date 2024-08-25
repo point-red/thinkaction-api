@@ -17,6 +17,7 @@ const error_middleware_1 = require("../../middleware/error.middleware");
 const user_repository_1 = require("../../repositories/user.repository");
 const mongodb_1 = require("mongodb");
 const update_resolution_service_1 = __importDefault(require("./update-resolution.service"));
+const image_service_1 = require("../images/image.service");
 class UpdateCompleteGoalsService {
     constructor(postRepository) {
         this.postRepository = postRepository;
@@ -25,6 +26,10 @@ class UpdateCompleteGoalsService {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             const post = yield this.postRepository.readOne(id);
+            const photos = data.photos;
+            if (photos) {
+                data.photo = yield image_service_1.ImageService.move(photos);
+            }
             if (!post) {
                 throw new error_middleware_1.ResponseError(400, 'Post not found');
             }
@@ -42,7 +47,7 @@ class UpdateCompleteGoalsService {
                 updatedDate: new Date(),
                 shareWith: (_b = data.shareWith) !== null && _b !== void 0 ? _b : post.shareWith,
                 weeklyGoalId: data.weeklyGoalId ? new mongodb_1.ObjectId(data.weeklyGoalId) : post.weeklyGoalId,
-                isComplete: (_c = data.isComplete) !== null && _c !== void 0 ? _c : post.isComplete,
+                isComplete: (_c = (data.isComplete === 'true')) !== null && _c !== void 0 ? _c : post.isComplete,
                 isUpdating: true,
                 createdDate: post.createdDate,
             });
@@ -66,7 +71,7 @@ class UpdateCompleteGoalsService {
             ]);
             let updateResolutionsService = new update_resolution_service_1.default(this.postRepository);
             const data2 = {
-                isComplete: dataPost.isComplete,
+                isComplete: dataPost.isComplete === 'true',
             };
             yield updateResolutionsService.handle(data2, authUserId, categoryResolution[0]._id);
             const userRepository = new user_repository_1.UserRepository();

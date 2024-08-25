@@ -14,8 +14,9 @@ const error_middleware_1 = require("../../middleware/error.middleware");
 const user_repository_1 = require("../../repositories/user.repository");
 const mongodb_1 = require("mongodb");
 class CreateCommentService {
-    constructor(commentRepository) {
+    constructor(commentRepository, postRepository) {
         this.commentRepository = commentRepository;
+        this.postRepository = postRepository;
     }
     handle(data, id) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -31,6 +32,7 @@ class CreateCommentService {
             });
             let commentData = commentEntity.CheckData();
             let comment = yield this.commentRepository.create(commentData);
+            yield this.postRepository.addCommentCount(data.postId);
             const dataComment = yield this.commentRepository.readOne(comment.insertedId.toString());
             if (!dataComment) {
                 throw new error_middleware_1.ResponseError(404, 'Comment not found');

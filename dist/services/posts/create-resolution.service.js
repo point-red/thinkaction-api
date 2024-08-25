@@ -13,6 +13,7 @@ const posts_entity_1 = require("../../entities/posts.entity");
 const error_middleware_1 = require("../../middleware/error.middleware");
 const user_repository_1 = require("../../repositories/user.repository");
 const mongodb_1 = require("mongodb");
+const image_service_1 = require("../images/image.service");
 class CreateResolutionService {
     constructor(postRepository) {
         this.postRepository = postRepository;
@@ -31,6 +32,10 @@ class CreateResolutionService {
             if (!['everyone', 'supporter', 'private'].includes(data.shareWith)) {
                 throw new Error('Choose a visibilty');
             }
+            const photos = data.photos;
+            if (photos) {
+                data.photo = yield image_service_1.ImageService.move(photos);
+            }
             const totalPosts = yield this.postRepository.aggregate([
                 {
                     $match: {
@@ -43,7 +48,12 @@ class CreateResolutionService {
                     },
                 },
             ]);
-            if (totalPosts.length === 7 || totalPosts.length > 7) {
+            const totalSameResolutions = this.postRepository.aggregate([
+                {
+                    $match: {}
+                }
+            ]);
+            if (totalPosts.length >= 7) {
                 throw new error_middleware_1.ResponseError(400, 'Resolutions cannot be more than 7');
             }
             const postEntity = new posts_entity_1.PostEntity({

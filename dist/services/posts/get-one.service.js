@@ -14,7 +14,7 @@ class GetOnePostService {
     constructor(postRepository) {
         this.postRepository = postRepository;
     }
-    handle(id) {
+    handle(authUserId, id) {
         return __awaiter(this, void 0, void 0, function* () {
             const pipeline = [
                 {
@@ -35,6 +35,9 @@ class GetOnePostService {
                         userInfo: {
                             $arrayElemAt: ['$userInfo', 0],
                         },
+                        likedByCurrent: {
+                            $in: [new mongodb_1.ObjectId(authUserId), "$like"]
+                        }
                     },
                 },
                 {
@@ -46,6 +49,7 @@ class GetOnePostService {
                         caption: 1,
                         photo: 1,
                         likeCount: 1,
+                        likedByCurrent: 1,
                         commentCount: 1,
                         dueDate: 1,
                         createdDate: 1,

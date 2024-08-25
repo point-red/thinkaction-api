@@ -52,6 +52,7 @@ class GetCurrentUserNotificationService {
                 {
                     $project: {
                         category: '$_id',
+                        userId: 1,
                         notifications: 1,
                     },
                 },

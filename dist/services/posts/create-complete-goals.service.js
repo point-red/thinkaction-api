@@ -16,12 +16,17 @@ const posts_entity_1 = require("../../entities/posts.entity");
 const user_repository_1 = require("../../repositories/user.repository");
 const mongodb_1 = require("mongodb");
 const update_resolution_service_1 = __importDefault(require("./update-resolution.service"));
+const image_service_1 = require("../images/image.service");
 class CreateCompleteGoalsService {
     constructor(postRepository) {
         this.postRepository = postRepository;
     }
     handle(data, authUserId) {
         return __awaiter(this, void 0, void 0, function* () {
+            const photos = data.photos;
+            if (photos) {
+                data.photo = yield image_service_1.ImageService.move(photos);
+            }
             const postEntity = new posts_entity_1.PostEntity({
                 userId: new mongodb_1.ObjectId(authUserId),
                 categoryResolutionId: new mongodb_1.ObjectId(data.categoryResolutionId),
@@ -32,10 +37,10 @@ class CreateCompleteGoalsService {
                 likeCount: 0,
                 commentCount: 0,
                 dueDate: new Date(data.dueDate),
-                updatedDate: data.updatedDate,
+                updatedDate: new Date(data.updatedDate),
                 shareWith: data.shareWith,
                 weeklyGoalId: new mongodb_1.ObjectId(data.weeklyGoalId),
-                isComplete: data.isComplete,
+                isComplete: data.isComplete === 'true',
                 isUpdating: false,
                 createdDate: new Date(),
             });
@@ -56,7 +61,7 @@ class CreateCompleteGoalsService {
             ]);
             let updateResolutionsService = new update_resolution_service_1.default(this.postRepository);
             const data2 = {
-                isComplete: data.isComplete,
+                isComplete: data.isComplete === 'true',
             };
             yield updateResolutionsService.handle(data2, authUserId, categoryResolution[0]._id);
             const userRepository = new user_repository_1.UserRepository();

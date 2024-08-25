@@ -44,6 +44,7 @@ class GetCurrentUserRequestService {
                 },
                 {
                     $project: {
+                        _id: 1,
                         fullname: 1,
                         username: 1,
                         email: 1,

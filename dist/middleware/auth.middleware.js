@@ -11,10 +11,10 @@ dotenv_1.default.config();
 const verifyUser = (req, res, next) => {
     const validationReq = req;
     const { authorization } = validationReq.headers;
-    if (!authorization) {
+    if (!authorization && !req.cookies['jwt-token']) {
         throw new error_middleware_1.ResponseError(401, 'Please login to get access');
     }
-    const token = authorization.split(' ')[1];
+    const token = (authorization === null || authorization === void 0 ? void 0 : authorization.split(' ')[1]) || req.cookies['jwt-token'];
     const secret = process.env.JWT_SECRET;
     try {
         const jwtDecode = jsonwebtoken_1.default.verify(token, secret);

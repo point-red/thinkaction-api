@@ -29,6 +29,7 @@ const errorMiddleware = (err, req, res, next) => __awaiter(void 0, void 0, void 
         next();
         return;
     }
+    console.log(err);
     if (err instanceof ResponseError) {
         res
             .status(err.status)

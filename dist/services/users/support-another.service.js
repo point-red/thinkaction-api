@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const error_middleware_1 = require("../../middleware/error.middleware");
 const notification_repository_1 = require("../../repositories/notification.repository");
+const mongodb_1 = require("mongodb");
 class SupportAnotherUserService {
     constructor(userRepository) {
         this.userRepository = userRepository;
@@ -32,6 +33,7 @@ class SupportAnotherUserService {
             if (userToSupport.isPublic) {
                 const notification = yield notificationRepository.create({
                     type: 'message',
+                    fromUserId: new mongodb_1.ObjectId(authUser._id),
                     message: `${authUser.username} has supported you`,
                     date: new Date(),
                 });
@@ -42,6 +44,7 @@ class SupportAnotherUserService {
             else {
                 const notification = yield notificationRepository.create({
                     type: 'request',
+                    fromUserId: new mongodb_1.ObjectId(authUser._id),
                     message: `${authUser.username} wants to support you`,
                     status: 'pending',
                     date: new Date(),

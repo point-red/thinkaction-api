@@ -11,10 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const error_middleware_1 = require("../../middleware/error.middleware");
 class AcceptSupportRequestService {
-    constructor(userRepository) {
+    constructor(userRepository, notificationRepository) {
         this.userRepository = userRepository;
+        this.notificationRepository = notificationRepository;
     }
-    handle(id, authUserId) {
+    handle(id, authUserId, notificationId) {
         return __awaiter(this, void 0, void 0, function* () {
             const userToAccept = yield this.userRepository.readOne(id);
             if (!userToAccept) {
@@ -22,6 +23,11 @@ class AcceptSupportRequestService {
             }
             yield this.userRepository.updateOne6(id, authUserId);
             yield this.userRepository.updateOne2(id, authUserId);
+            yield this.notificationRepository.update(notificationId, {
+                type: 'message',
+                message: `${userToAccept.username} has supported you`,
+                date: new Date(),
+            });
             const updatedUser = yield this.userRepository.findOne4(id);
             return updatedUser;
         });

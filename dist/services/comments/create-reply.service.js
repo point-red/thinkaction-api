@@ -14,8 +14,9 @@ const error_middleware_1 = require("../../middleware/error.middleware");
 const user_repository_1 = require("../../repositories/user.repository");
 const mongodb_1 = require("mongodb");
 class CreateReplyCommentService {
-    constructor(commentRepository) {
+    constructor(commentRepository, postRepository) {
         this.commentRepository = commentRepository;
+        this.postRepository = postRepository;
     }
     handle(data, id) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -30,6 +31,7 @@ class CreateReplyCommentService {
                 createdDate: new Date(),
                 isUpdating: data.isUpdating || false,
             });
+            yield this.postRepository.addCommentCount(data.postId);
             let commentData = commentEntity.CheckData();
             let comment = yield this.commentRepository.update(data.replyTo, commentData._id);
             yield this.commentRepository.create(commentData);

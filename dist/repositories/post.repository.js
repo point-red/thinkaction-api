@@ -39,6 +39,16 @@ class PostRepository extends database_1.default {
             return yield this.collection.updateOne({ _id: new mongodb_1.ObjectId(id) }, { $push: { like: new mongodb_1.ObjectId(authUserId) }, $inc: { likeCount: 1 } });
         });
     }
+    addCommentCount(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.collection.updateOne({ _id: new mongodb_1.ObjectId(id) }, { $inc: { commentCount: 1 } });
+        });
+    }
+    deleteCommentCount(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.collection.updateOne({ _id: new mongodb_1.ObjectId(id) }, { $dec: { commentCount: 1 } });
+        });
+    }
     update3(id, authUserId) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.collection.updateOne({ _id: new mongodb_1.ObjectId(id) }, { $pull: { like: new mongodb_1.ObjectId(authUserId) }, $inc: { likeCount: -1 } });

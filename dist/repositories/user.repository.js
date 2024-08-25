@@ -155,7 +155,9 @@ class UserRepository extends database_1.default {
     }
     updateOne11(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.collection.updateOne({ _id: new mongodb_1.ObjectId(id) }, { $push: { categoryResolution: data } });
+            return yield this.collection.updateOne({ _id: new mongodb_1.ObjectId(id) }, {
+                $push: { categoryResolution: data }
+            });
         });
     }
     updateOne12(id, data) {

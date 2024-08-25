@@ -8,11 +8,11 @@ interface UserData {
   role: string;
 }
 
-declare namespace Express {
-  export interface Request {
-    userData: UserData
-  }
-}
 declare global {
   var mongodbClient: MongoClient
+  declare namespace Express {
+    export interface Request {
+      userData: UserData
+    }
+  }
 }

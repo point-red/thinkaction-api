@@ -17,6 +17,25 @@ class GetOneUserService {
     handle(id, authUserId) {
         return __awaiter(this, void 0, void 0, function* () {
             const isAuthenticatedUser = authUserId == id;
+            const project = {
+                _id: 1,
+                fullname: 1,
+                username: 1,
+                email: 1,
+                bio: 1,
+                photo: 1,
+                categoryResolution: 1,
+                isPublic: 1,
+                supporterCount: 1,
+                supportingCount: 1,
+                goalsPerformance: 1,
+                isAuthenticatedUser: 1,
+                isSupporting: 1,
+            };
+            if (isAuthenticatedUser) {
+                project.notificationCount = 1;
+                project.requestCount = 1;
+            }
             const pipeline = [
                 { $match: { _id: new mongodb_1.ObjectId(id) } },
                 {
@@ -24,27 +43,12 @@ class GetOneUserService {
                         ? {}
                         : {
                             isSupporting: {
-                                $in: [authUserId, '$supporter'],
+                                $in: [new mongodb_1.ObjectId(authUserId), '$supporter'],
                             },
                         })),
                 },
                 {
-                    $project: {
-                        fullname: 1,
-                        username: 1,
-                        email: 1,
-                        bio: 1,
-                        photo: 1,
-                        categoryResolution: 1,
-                        isPublic: 1,
-                        supporterCount: 1,
-                        supportingCount: 1,
-                        notificationCount: 1,
-                        requestCount: 1,
-                        goalsPerformance: 1,
-                        isAuthenticatedUser: 1,
-                        isSupporting: 1,
-                    },
+                    $project: project,
                 },
             ];
             const result = yield this.userRepository.aggregate(pipeline);

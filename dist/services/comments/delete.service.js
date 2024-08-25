@@ -12,8 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
 const error_middleware_1 = require("../../middleware/error.middleware");
 class DeleteCommentService {
-    constructor(commentRepository) {
+    constructor(commentRepository, postRepository) {
         this.commentRepository = commentRepository;
+        this.postRepository = postRepository;
     }
     handle(id, authUserId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -45,6 +46,7 @@ class DeleteCommentService {
                     yield this.commentRepository.delete(data.toString());
                 }));
             }
+            yield this.postRepository.deleteCommentCount(comment.postId);
             return yield this.commentRepository.delete(id);
         });
     }

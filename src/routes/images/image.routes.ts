@@ -11,9 +11,8 @@ import multer from "multer";
 const upload = multer()
 const router = Router();
 
-const s3 = new ImageEntity()
-const getImageService = new GetImageService(s3)
-const uploadImageService = new UploadImageService(s3)
+const getImageService = new GetImageService()
+const uploadImageService = new UploadImageService()
 const imageController = new ImageController(getImageService, uploadImageService)
 
 router.get('/:key', (req, res, next) => imageController.getImage(req, res, next));

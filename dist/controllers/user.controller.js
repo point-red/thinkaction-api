@@ -14,9 +14,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const image_service_1 = require("../services/images/image.service");
 dotenv_1.default.config();
 class UserController {
-    constructor(createUserService, updateMyPasswordUserService, getOneUserService, getAllSupporterService, getAllSupportingService, getCurrentUserRequestService, getCurrentUserNotificationService, updateCurrentUserService, supportAnotherUserService, unsupportAnotherUserService, acceptSupportRequestService, rejectSupportRequestService, searchUserService, getHistoryService, deleteHistoryService) {
+    constructor(createUserService, updateMyPasswordUserService, getOneUserService, getAllSupporterService, getAllSupportingService, getCurrentUserRequestService, getCurrentUserNotificationService, updateCurrentUserService, supportAnotherUserService, unsupportAnotherUserService, acceptSupportRequestService, rejectSupportRequestService, searchUserService, getHistoryService, deleteHistoryService, getImageService) {
         this.createUserService = createUserService;
         this.updateMyPasswordUserService = updateMyPasswordUserService;
         this.getOneUserService = getOneUserService;
@@ -32,6 +33,17 @@ class UserController {
         this.searchUserService = searchUserService;
         this.getHistoryService = getHistoryService;
         this.deleteHistoryService = deleteHistoryService;
+        this.getImageService = getImageService;
+    }
+    getAuthUser(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                res.status(200).json(req.userData);
+            }
+            catch (e) {
+                next(e);
+            }
+        });
     }
     createUser(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -51,7 +63,7 @@ class UserController {
                     expiresIn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
                     httpOnly: true,
                 };
-                return res.status(200).json({ status: 'success', token: token, data: { user: result } });
+                return res.cookie('jwt-token', token, cookieOptions).status(200).json({ status: 'success', token: token, data: { user: result } });
             }
             catch (e) {
                 next(e);
@@ -89,6 +101,7 @@ class UserController {
                 const { id } = req.params;
                 const authUserId = req.userData._id;
                 const result = yield this.getOneUserService.handle(id, authUserId);
+                // result.photo = await this.getImageService.handle(result.photo)
                 return res.status(200).json({ status: 'success', data: result });
             }
             catch (e) {
@@ -101,8 +114,8 @@ class UserController {
             try {
                 const { id } = req.params;
                 const authUserId = req.userData._id;
-                const { page, limit } = req.body;
-                const result = yield this.getAllSupporterService.handle(id, authUserId, page, limit);
+                const { page, limit, username } = req.query;
+                const result = yield this.getAllSupporterService.handle(id, authUserId, page, limit, username || '');
                 return res.status(200).json({ status: 'success', limit, page, results: result.length, data: result });
             }
             catch (e) {
@@ -115,8 +128,8 @@ class UserController {
             try {
                 const { id } = req.params;
                 const authUserId = req.userData._id;
-                const { page, limit } = req.body;
-                const result = yield this.getAllSupportingService.handle(id, authUserId, page, limit);
+                const { page, limit, username } = req.query;
+                const result = yield this.getAllSupportingService.handle(id, authUserId, page, limit, username || '');
                 return res.status(200).json({ status: 'success', limit, page, results: result.length, data: result });
             }
             catch (e) {
@@ -160,7 +173,10 @@ class UserController {
             try {
                 const id = req.userData._id;
                 const data = req.body;
-                let result = yield this.updateCurrentUserService.handle(id, req.body);
+                const photos = yield image_service_1.ImageService.move(req.file);
+                data.photo = photos === null || photos === void 0 ? void 0 : photos[0];
+                let result = yield this.updateCurrentUserService.handle(id, data);
+                // result.photo = await this.getImageService.handle(result.photo)
                 return res.status(200).json({ status: 'success', data: result });
             }
             catch (e) {
@@ -197,9 +213,9 @@ class UserController {
     acceptSupportRequest(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { userId } = req.body;
+                const { userId, notificationId } = req.body;
                 const authUserId = req.userData._id;
-                const result = yield this.acceptSupportRequestService.handle(userId, authUserId);
+                const result = yield this.acceptSupportRequestService.handle(userId, authUserId, notificationId);
                 return res.status(200).json({ status: 'success', message: 'Support request accepted successfully', data: result });
             }
             catch (e) {
@@ -223,7 +239,7 @@ class UserController {
     searchUser(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { username } = req.body;
+                const { username } = req.query;
                 const authUserId = req.userData._id;
                 const result = yield this.searchUserService.handle(username, authUserId);
                 return res.status(200).json({ status: 'success', results: result.length, data: result });

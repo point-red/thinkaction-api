@@ -13,6 +13,7 @@ const posts_entity_1 = require("../../entities/posts.entity");
 const error_middleware_1 = require("../../middleware/error.middleware");
 const user_repository_1 = require("../../repositories/user.repository");
 const mongodb_1 = require("mongodb");
+const image_service_1 = require("../images/image.service");
 class UpdateWeeklyGoalsService {
     constructor(postRepository) {
         this.postRepository = postRepository;
@@ -23,6 +24,10 @@ class UpdateWeeklyGoalsService {
             const post = yield this.postRepository.readOne(id);
             if (!post) {
                 throw new error_middleware_1.ResponseError(400, 'Post not found');
+            }
+            const photos = data.photos;
+            if (photos) {
+                data.photo = yield image_service_1.ImageService.replace(post.photo, photos);
             }
             const postEntity = new posts_entity_1.PostEntity({
                 _id: post._id,

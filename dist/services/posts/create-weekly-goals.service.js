@@ -12,12 +12,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const posts_entity_1 = require("../../entities/posts.entity");
 const user_repository_1 = require("../../repositories/user.repository");
 const mongodb_1 = require("mongodb");
+const image_service_1 = require("../images/image.service");
 class CreateWeeklyGoalsService {
     constructor(postRepository) {
         this.postRepository = postRepository;
     }
     handle(data, authUserId) {
         return __awaiter(this, void 0, void 0, function* () {
+            const photos = data.photos;
+            if (photos) {
+                data.photo = yield image_service_1.ImageService.move(photos);
+            }
             const postEntity = new posts_entity_1.PostEntity({
                 userId: new mongodb_1.ObjectId(authUserId),
                 categoryResolutionId: new mongodb_1.ObjectId(data.categoryResolutionId),

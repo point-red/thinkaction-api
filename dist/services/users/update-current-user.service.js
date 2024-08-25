@@ -16,19 +16,25 @@ class UpdateCurrentUserService {
         this.userRepository = userRepository;
     }
     handle(id, data) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f;
         return __awaiter(this, void 0, void 0, function* () {
             let userNow = yield this.userRepository.readOne(id);
             if (!userNow) {
                 throw new error_middleware_1.ResponseError(404, 'User not found');
+            }
+            if (typeof data.isPublic === 'string') {
+                data.isPublic = data.isPublic === 'true';
+            }
+            if (userNow.photo && data.photo) {
+                // ImageService.remove(userNow.photo);
             }
             const userEntity = new users_entity_1.UserEntity({
                 email: userNow.email,
                 username: (_a = data.username) !== null && _a !== void 0 ? _a : userNow.username,
                 password: userNow.password,
                 fullname: (_b = data.fullname) !== null && _b !== void 0 ? _b : userNow.fullname,
-                bio: (_c = data.bio) !== null && _c !== void 0 ? _c : userNow.bio,
-                photo: (_d = data.photo) !== null && _d !== void 0 ? _d : userNow.photo,
+                bio: (_d = (_c = data.bio) !== null && _c !== void 0 ? _c : userNow.bio) !== null && _d !== void 0 ? _d : '',
+                photo: (_e = data.photo) !== null && _e !== void 0 ? _e : userNow.photo,
                 supporter: userNow.supporter,
                 supporting: userNow.supporting,
                 request: userNow.request,
@@ -40,7 +46,7 @@ class UpdateCurrentUserService {
                 notificationCount: userNow.notificationCount,
                 historyAccount: userNow.historyAccount,
                 categoryResolution: userNow.categoryResolution,
-                isPublic: (_e = data.isPublic) !== null && _e !== void 0 ? _e : userNow.isPublic,
+                isPublic: (_f = data.isPublic) !== null && _f !== void 0 ? _f : userNow.isPublic,
                 isUpdating: userNow.isUpdating,
             });
             let userData = userEntity.CheckData();

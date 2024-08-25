@@ -61,7 +61,7 @@ class PostEntity {
         else if (!['everyone', 'supporter', 'private'].includes(this.post.shareWith)) {
             errors.shareWith = 'Share with must be either "everyone", "supporter", or "private".';
         }
-        if (this.post.isComplete && typeof this.post.isComplete !== 'boolean') {
+        if (this.post.isComplete !== undefined && typeof this.post.isComplete !== 'boolean') {
             errors.isComplete = 'isComplete must be a boolean value.';
         }
         if (this.post.isUpdating && typeof this.post.isUpdating !== 'boolean') {

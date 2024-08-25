@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
+const pagination_1 = require("../utils/pagination");
 dotenv_1.default.config();
 class PostController {
     constructor(getAllPostService, getOnePostService, getAllLikePostService, createResolutionService, createWeeklyGoalsService, createCompleteGoalsService, updateResolutionsService, updateWeeklyGoalsService, updateCompleteGoalsService, likePostService, unlikePostService, getMonthlyReportService, getYearReportService, deletePostService) {
@@ -34,8 +35,22 @@ class PostController {
     getAllPost(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const result = yield this.getAllPostService.handle(req.body);
-                return res.status(200).json({ status: 'success', data: result });
+                const authUserId = req.userData._id;
+                const result = yield this.getAllPostService.handle(authUserId, pagination_1.Pagination.paginate(req.query));
+                result.data = result.data.map((post) => {
+                    var _a;
+                    return (Object.assign(Object.assign({}, post), { categoryResolution: (_a = post.userInfo.categoryResolution.find((cr) => cr._id === post.categoryResolutionId)) === null || _a === void 0 ? void 0 : _a.name }));
+                });
+                // result.data = await Promise.all(result.data.map(async (post: PostInterface) => ({
+                //   ...post,
+                //   photo: await Promise.all((post?.photo || []).map(async (img: string) => (await this.getImageService.handle(img)))),
+                //   categoryResolution: (post as Record<string, any>).userInfo.categoryResolution.find((cr: any) => cr._id === post.categoryResolutionId)?.name,
+                //   userInfo: {
+                //     ...(post as Record<string, any>).userInfo,
+                //     photo: (post as Record<string, any>).userInfo.photo ? await this.getImageService.handle((post as Record<string, any>).userInfo.photo) : ''
+                //   }
+                // })))
+                return res.status(200).json({ status: 'success', data: result.data });
             }
             catch (e) {
                 next(e);
@@ -46,7 +61,8 @@ class PostController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = req.params;
-                const result = yield this.getOnePostService.handle(id);
+                const authUserId = req.userData._id;
+                const result = yield this.getOnePostService.handle(authUserId, id);
                 return res.status(200).json({ status: 'success', data: result });
             }
             catch (e) {
@@ -71,7 +87,9 @@ class PostController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const authUserId = req.userData._id;
-                const result = yield this.createResolutionService.handle(req.body, authUserId);
+                const data = req.body;
+                data.photos = req.files;
+                const result = yield this.createResolutionService.handle(data, authUserId);
                 return res.status(200).json({ status: 'success', data: result });
             }
             catch (e) {
@@ -83,7 +101,9 @@ class PostController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const authUserId = req.userData._id;
-                const result = yield this.createWeeklyGoalsService.handle(req.body, authUserId);
+                const data = req.body;
+                data.photos = req.files;
+                const result = yield this.createWeeklyGoalsService.handle(data, authUserId);
                 return res.status(200).json({ status: 'success', data: result });
             }
             catch (e) {
@@ -95,7 +115,9 @@ class PostController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const authUserId = req.userData._id;
-                const result = yield this.createCompleteGoalsService.handle(req.body, authUserId);
+                const data = req.body;
+                data.photos = req.files;
+                const result = yield this.createCompleteGoalsService.handle(data, authUserId);
                 return res.status(200).json({ status: 'success', data: result });
             }
             catch (e) {
@@ -108,7 +130,9 @@ class PostController {
             try {
                 const authUserId = req.userData._id;
                 const { id } = req.params;
-                const result = yield this.updateResolutionsService.handle(req.body, authUserId, id);
+                const data = req.body;
+                data.photos = req.files;
+                const result = yield this.updateResolutionsService.handle(data, authUserId, id);
                 return res.status(200).json({ status: 'success', data: result });
             }
             catch (e) {
@@ -121,7 +145,9 @@ class PostController {
             try {
                 const authUserId = req.userData._id;
                 const { id } = req.params;
-                const result = yield this.updateWeeklyGoalsService.handle(req.body, authUserId, id);
+                const data = req.body;
+                data.photos = req.files;
+                const result = yield this.updateWeeklyGoalsService.handle(data, authUserId, id);
                 return res.status(200).json({ status: 'success', data: result });
             }
             catch (e) {
@@ -170,7 +196,7 @@ class PostController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const authUserId = req.userData._id;
-                const result = yield this.getMonthlyReportService.handle(req.body, authUserId);
+                const result = yield this.getMonthlyReportService.handle(req.query, authUserId);
                 return res.status(200).json({ status: 'success', data: result });
             }
             catch (e) {
@@ -182,7 +208,7 @@ class PostController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const authUserId = req.userData._id;
-                const result = yield this.getYearReportService.handle(req.body, authUserId);
+                const result = yield this.getYearReportService.handle(req.query, authUserId);
                 return res.status(200).json({ status: 'success', data: result });
             }
             catch (e) {

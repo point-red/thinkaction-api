@@ -5,13 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = void 0;
 const express_1 = require("express");
+const auth_routes_1 = __importDefault(require("./auth/auth.routes"));
 const users_routes_1 = __importDefault(require("./users/users.routes"));
 const comments_routes_1 = __importDefault(require("./comments/comments.routes"));
 const notifications_routes_1 = __importDefault(require("./notifications/notifications.routes"));
 const post_routes_1 = __importDefault(require("./posts/post.routes"));
+const image_routes_1 = __importDefault(require("./images/image.routes"));
 const router = (0, express_1.Router)();
 exports.router = router;
+router.use('/auth', auth_routes_1.default);
 router.use('/users', users_routes_1.default);
 router.use('/comments', comments_routes_1.default);
 router.use('/notifications', notifications_routes_1.default);
 router.use('/posts', post_routes_1.default);
+router.use('/images', image_routes_1.default);

@@ -14,11 +14,11 @@ class GetAllSupporterService {
     constructor(userRepository) {
         this.userRepository = userRepository;
     }
-    handle(id, authUserId, page, limit) {
+    handle(id, authUserId, page, limit, username) {
         return __awaiter(this, void 0, void 0, function* () {
             const skip = (page - 1) * limit;
             const pipeline = [
-                { $match: { _id: new mongodb_1.ObjectId(id) } },
+                { $match: { _id: new mongodb_1.ObjectId(id), username: { $regex: username } } },
                 { $unwind: '$supporter' },
                 { $skip: +skip },
                 { $limit: +limit },
