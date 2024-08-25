@@ -27,16 +27,22 @@ export default class Database {
       retryWrites: true,
     });
     global.mongodbClient = client;
+    client.on('close', () => {
+      global.mongodbClient = undefined;
+    })
+    client.on('error', () => {
+      global.mongodbClient = undefined;
+    })
     client = await client.connect();
     console.log("Connected to MongoDB.");
     return client;
   }
 
   private async connect(collection: string) {
-    if (!global.mongodbClient) {
+    if (typeof global.mongodbClient === 'undefined') {
       await Database.init();
     }
-    this.client = global.mongodbClient;
+    this.client = global.mongodbClient as MongoClient;
     this.db = this.client.db(this.dbName);
     this.collection = this.db.collection(collection);
 

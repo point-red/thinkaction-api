@@ -9,7 +9,7 @@ interface UserData {
 }
 
 declare global {
-  var mongodbClient: MongoClient
+  var mongodbClient: MongoClient | undefined;
   declare namespace Express {
     export interface Request {
       userData: UserData
