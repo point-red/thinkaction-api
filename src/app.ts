@@ -32,7 +32,9 @@ const init = async () => {
   app.use('/', (req: Request, res: Response, next: NextFunction): void => {
     res.json({});
   });
-  app.listen(PORT, (): void => console.log(`running on port ${PORT}`));
+  if (process.env.VERCEL !== '1') {
+    app.listen(PORT, (): void => console.log(`running on port ${PORT}`));
+  }
   return app;
 }
 
