@@ -42,12 +42,16 @@ export default class AuthController {
     if (req.body.code) {
       try {
         req.body.credential = (await client.getToken(req.body.code))?.tokens?.id_token;
+
       } catch (e) {
         console.log(req.body);
         return res.status(403).json({ message: "Login Failed" });
       }
     }
     const credentials = req.body.credential;
+    if (!credentials) {
+      return res.status(403).json({ message: "Invalid credentials" });
+    }
     const ticket = await client.verifyIdToken({
       idToken: credentials,
     })
