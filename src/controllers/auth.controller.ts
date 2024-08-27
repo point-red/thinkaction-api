@@ -83,18 +83,18 @@ export default class AuthController {
       username: user.username,
       email: user.email,
     };
-    return res.status(200).json({ user });
 
-    // const secret = process.env.JWT_SECRET!;
+    const secret = process.env.JWT_SECRET!;
 
-    // const token = jwt.sign(newPayload, secret, {
-    //   expiresIn: process.env.JWT_EXPIRES,
-    // });
+    const token = jwt.sign(newPayload, secret, {
+      expiresIn: process.env.JWT_EXPIRES,
+    });
 
-    // const cookieOptions = {
-    //   expiresIn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-    //   httpOnly: true,
-    // };
+    const cookieOptions = {
+      expiresIn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+    };
+    return res.status(200).json({ user, cookieOptions, token });
 
     // return res.cookie('jwt-token', token, cookieOptions).status(200).json({
     //   status: 'success',
