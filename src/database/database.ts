@@ -22,11 +22,15 @@ export default class Database {
 
   public static async init() {
     let client = new MongoClient(Database.uri, {
-      tlsAllowInvalidHostnames: true,
       retryReads: true,
       retryWrites: true,
+      family: 4,
+      connectTimeoutMS: 60000,
+      serverSelectionTimeoutMS: 60000,
     });
-    global.mongodbClient = client;
+    if (process.env.NODE_ENV !== 'production') {
+      global.mongodbClient = client;
+    }
     client.on('close', () => {
       console.log("Closed MongoDB connection");
       global.mongodbClient = undefined;
