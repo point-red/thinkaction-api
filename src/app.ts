@@ -14,11 +14,11 @@ const PORT: Number = Number(process.env.PORT) || 5050;
 const init = async () => {
   const app: Application = express();
 
-  if (process.env.NODE_ENV !== 'production') {
-    if (!global.mongodbClient) {
-      await Database.init();
-    }
-  }
+  // if (process.env.NODE_ENV !== 'production') {
+  // if (!global.mongodbClient) {
+  // await Database.init();
+  // }
+  // }
 
   app.use(cors({
     credentials: true,

@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import App from "./app";
 import Database from "./database/database";
 
-process.on('SIGINT', () => Database.disconnect('SIGINT'));
-process.on('SIGTERM', () => Database.disconnect('SIGTERM'));
+// process.on('SIGINT', () => Database.disconnect('SIGINT'));
+// process.on('SIGTERM', () => Database.disconnect('SIGTERM'));
 
 if (process.env.VERCEL === '1') {
   // If in Vercel, export the app for serverless function handling
