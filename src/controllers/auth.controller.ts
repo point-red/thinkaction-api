@@ -50,70 +50,70 @@ export default class AuthController {
     if (!credentials) {
       return res.status(403).json({ message: "Invalid credentials" });
     }
-    return res.status(200).send({});
-    // const ticket = await client.verifyIdToken({
-    //   idToken: credentials,
-    // })
+    const ticket = await client.verifyIdToken({
+      idToken: credentials,
+    })
 
-    // const payload = ticket.getPayload()
-    // if (!payload?.email)
-    //   return res.status(403).json({ message: 'Forbidden' });
+    const payload = ticket.getPayload()
+    if (!payload?.email)
+      return res.status(403).json({ message: 'Forbidden' });
 
-    // let user = await this.userRepository.getUserByEmail(payload.email);
+    let user = await this.userRepository.getUserByEmail(payload.email);
+    return res.status(200).json({ user });
 
-    // if (!user?.email) {
-    //   let image: any = payload.picture;
-    //   if (image !== undefined) {
-    //     try {
-    //       const response = await getResponse(image);
-    //       image = await CloudStorage.send(response);
-    //     } catch (e) {
-    //       image = null;
-    //     }
-    //   }
-    //   user = await this.createUserService.handle({
-    //     username: payload.email,
-    //     email: payload.email,
-    //     fullname: payload.name,
-    //     photo: image,
-    //     password: Math.random().toFixed(32).substring(2)
-    //   });
-    // }
-    // const newPayload = {
-    //   _id: user._id,
-    //   username: user.username,
-    //   email: user.email,
-    // };
+    if (!user?.email) {
+      let image: any = payload.picture;
+      if (image !== undefined) {
+        try {
+          const response = await getResponse(image);
+          image = await CloudStorage.send(response);
+        } catch (e) {
+          image = null;
+        }
+      }
+      user = await this.createUserService.handle({
+        username: payload.email,
+        email: payload.email,
+        fullname: payload.name,
+        photo: image,
+        password: Math.random().toFixed(32).substring(2)
+      });
+    }
+    const newPayload = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+    };
 
-    // const secret = process.env.JWT_SECRET!;
+    const secret = process.env.JWT_SECRET!;
 
-    // const token = jwt.sign(newPayload, secret, {
-    //   expiresIn: process.env.JWT_EXPIRES,
-    // });
+    const token = jwt.sign(newPayload, secret, {
+      expiresIn: process.env.JWT_EXPIRES,
+    });
 
-    // const cookieOptions = {
-    //   expiresIn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-    //   httpOnly: true,
-    // };
+    const cookieOptions = {
+      expiresIn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+    };
 
-    // return res.cookie('jwt-token', token, cookieOptions).status(200).json({
-    //   status: 'success',
-    //   token: token,
-    //   data: {
-    //     user: {
-    //       _id: user._id,
-    //       username: user.username,
-    //       fullname: user.fullname,
-    //       email: user.email,
-    //       bio: user.bio,
-    //       supporterCount: user.supporterCount,
-    //       supportingCount: user.supportingCount,
-    //       photo: user.photo,
-    //       categoryResolution: user.categoryResolution,
-    //       isPublic: user.isPublic,
-    //     },
-    //   },
-    // });
+    return res.cookie('jwt-token', token, cookieOptions).status(200).json({
+      status: 'success',
+      token: token,
+      data: {
+        user: {
+          _id: user._id,
+          username: user.username,
+          fullname: user.fullname,
+          email: user.email,
+          bio: user.bio,
+          supporterCount: user.supporterCount,
+          supportingCount: user.supportingCount,
+          photo: user.photo,
+          categoryResolution: user.categoryResolution,
+          isPublic: user.isPublic,
+        },
+      },
+    });
   }
 
   public async login(req: Request, res: Response, next: NextFunction) {
