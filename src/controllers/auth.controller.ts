@@ -52,6 +52,7 @@ export default class AuthController {
     }
     const ticket = await client.verifyIdToken({
       idToken: credentials,
+      audience: googleAuthConfig.clientId,
     })
 
     const payload = ticket.getPayload()
@@ -94,26 +95,25 @@ export default class AuthController {
       expiresIn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
       httpOnly: true,
     };
-    return res.status(200).json({ user, cookieOptions, token });
 
-    // return res.cookie('jwt-token', token, cookieOptions).status(200).json({
-    //   status: 'success',
-    //   token: token,
-    //   data: {
-    //     user: {
-    //       _id: user._id,
-    //       username: user.username,
-    //       fullname: user.fullname,
-    //       email: user.email,
-    //       bio: user.bio,
-    //       supporterCount: user.supporterCount,
-    //       supportingCount: user.supportingCount,
-    //       photo: user.photo,
-    //       categoryResolution: user.categoryResolution,
-    //       isPublic: user.isPublic,
-    //     },
-    //   },
-    // });
+    return res.cookie('jwt-token', token, cookieOptions).status(200).json({
+      status: 'success',
+      token: token,
+      data: {
+        user: {
+          _id: user._id,
+          username: user.username,
+          fullname: user.fullname,
+          email: user.email,
+          bio: user.bio,
+          supporterCount: user.supporterCount,
+          supportingCount: user.supportingCount,
+          photo: user.photo,
+          categoryResolution: user.categoryResolution,
+          isPublic: user.isPublic,
+        },
+      },
+    });
   }
 
   public async login(req: Request, res: Response, next: NextFunction) {
