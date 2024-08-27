@@ -21,13 +21,7 @@ export default class Database {
   }
 
   public static async init() {
-    let client = new MongoClient(Database.uri, {
-      retryReads: true,
-      retryWrites: true,
-      family: 4,
-      connectTimeoutMS: 60000,
-      serverSelectionTimeoutMS: 60000,
-    });
+    let client = new MongoClient(Database.uri);
     if (process.env.NODE_ENV !== 'production') {
       global.mongodbClient = client;
     }
@@ -45,10 +39,8 @@ export default class Database {
   }
 
   private async connect(collection: string) {
-    if (typeof global.mongodbClient === 'undefined') {
-      await Database.init();
-    }
-    this.client = global.mongodbClient as MongoClient;
+    let client = global.mongodbClient || await Database.init();
+    this.client = client;
     this.db = this.client.db(this.dbName);
     this.collection = this.db.collection(collection);
 
