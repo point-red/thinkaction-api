@@ -42,9 +42,7 @@ export default class AuthController {
     if (req.body.code) {
       try {
         req.body.credential = (await client.getToken(req.body.code))?.tokens?.id_token;
-
       } catch (e) {
-        console.log(req.body);
         return res.status(403).json({ message: "Login Failed" });
       }
     }
@@ -68,8 +66,6 @@ export default class AuthController {
         try {
           const response = await getResponse(image);
           image = await CloudStorage.send(response);
-          // await downloadImage(image, path.join(__dirname, '../images/' + filename))
-          // image = `images/${filename}`;
         } catch (e) {
           image = null;
         }

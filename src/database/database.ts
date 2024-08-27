@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export default class Database {
-  private static uri: string = process.env.DATABASE_URI || 'mongodb+srv://zildanmarginata:9i0GEZR8vImJTcuI@mymongodb.htazbwd.mongodb.net/mymongodb?retryWrites=true&w=majority';
+  private static uri: string = process.env.MONGODB_URI || 'mongodb+srv://zildanmarginata:9i0GEZR8vImJTcuI@mymongodb.htazbwd.mongodb.net/mymongodb?retryWrites=true&w=majority';
   private dbName: string = 'think_action';
   public db!: Db;
   private client: MongoClient | undefined;
@@ -28,9 +28,11 @@ export default class Database {
     });
     global.mongodbClient = client;
     client.on('close', () => {
+      console.log("Closed MongoDB connection");
       global.mongodbClient = undefined;
     })
     client.on('error', () => {
+      console.log("MongoDB Error connection");
       global.mongodbClient = undefined;
     })
     client = await client.connect();
@@ -57,9 +59,10 @@ export default class Database {
   }
 
   public static disconnect(signal: string) {
-    console.log(`Received ${signal}. Closing MongoDB connection...`);
     if (global.mongodbClient) {
+      console.log(`Received ${signal}. Closing MongoDB connection...`);
       global.mongodbClient.close().then(() => {
+        console.log(`Closed.`);
         process.exit();
       });
     }
