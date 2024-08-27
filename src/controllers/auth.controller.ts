@@ -59,31 +59,31 @@ export default class AuthController {
       return res.status(403).json({ message: 'Forbidden' });
 
     let user = await this.userRepository.getUserByEmail(payload.email);
-    return res.status(200).json({ user });
 
-    // if (!user?.email) {
-    //   let image: any = payload.picture;
-    //   if (image !== undefined) {
-    //     try {
-    //       const response = await getResponse(image);
-    //       image = await CloudStorage.send(response);
-    //     } catch (e) {
-    //       image = null;
-    //     }
-    //   }
-    //   user = await this.createUserService.handle({
-    //     username: payload.email,
-    //     email: payload.email,
-    //     fullname: payload.name,
-    //     photo: image,
-    //     password: Math.random().toFixed(32).substring(2)
-    //   });
-    // }
-    // const newPayload = {
-    //   _id: user._id,
-    //   username: user.username,
-    //   email: user.email,
-    // };
+    if (!user?.email) {
+      let image: any = payload.picture;
+      if (image !== undefined) {
+        try {
+          const response = await getResponse(image);
+          image = await CloudStorage.send(response);
+        } catch (e) {
+          image = null;
+        }
+      }
+      user = await this.createUserService.handle({
+        username: payload.email,
+        email: payload.email,
+        fullname: payload.name,
+        photo: image,
+        password: Math.random().toFixed(32).substring(2)
+      });
+    }
+    const newPayload = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+    };
+    return res.status(200).json({ user });
 
     // const secret = process.env.JWT_SECRET!;
 
