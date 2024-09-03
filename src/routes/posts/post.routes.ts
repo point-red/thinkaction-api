@@ -18,9 +18,12 @@ import GetMonthlyReportService from '../../services/posts/get-monthly-report.ser
 import GetYearReportService from '../../services/posts/get-year-report.service';
 import multer from 'multer';
 import os from 'os';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ storage, limits: { fileSize: Number(process.env.MAX_FILE_SIZE ?? '3000000') } });
 const router = Router();
 
 const postRepository = new PostRepository();

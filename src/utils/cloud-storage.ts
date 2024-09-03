@@ -34,7 +34,6 @@ export class CloudStorage {
       const result = response.data;
       return result?.filename ?? '';
     } catch (e) {
-      console.log(e);
       throw new Error('Failed to upload');
     }
   }
@@ -64,13 +63,27 @@ export class CloudStorage {
       const result = response.data;
       return result?.filename ?? '';
     } catch (e) {
-      console.log(e);
       throw new Error('Failed to upload');
     }
   }
 
   public static async remove(path: string) {
-    return true;
+    try {
+      if (!path) {
+        return false;
+      }
+
+      const response = await axios.delete(process.env.CLOUD_STORAGE + '/file/' + path, {
+        headers: {
+          'x-secret-key': process.env.SECRET_KEY || '',
+        },
+      })
+      const result = response.data;
+      return result?.message === 'File deleted successfully';
+    } catch (e) {
+      console.log(e);
+    }
+    return false;
   }
 
 }

@@ -23,9 +23,23 @@ export default class UpdateWeeklyGoalsService {
       throw new ResponseError(400, 'Post not found');
     }
     const photos = data.photos;
+    let uploadedImages = [];
     if (photos) {
-      data.photo = await ImageService.replace(post.photo, photos);
+      uploadedImages.push(...await ImageService.move(photos));
     }
+
+    if (data.removedImages && Array.isArray(data.removedImages)) {
+      const removed = [];
+      for (const image of data.removedImages) {
+        if (typeof image === 'string' && post.photo?.includes(image)) {
+          removed.push(image);
+          post.photo.splice(post.photo.indexOf(image));
+        }
+      }
+      ImageService.remove(removed);
+    }
+
+    data.photo = [...post.photo, ...uploadedImages];
 
     const postEntity = new PostEntity({
       _id: post._id,

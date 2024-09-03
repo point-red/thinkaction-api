@@ -25,6 +25,7 @@ export default class UnlikePostService {
     return {
       _id: data.postId,
       likeCount: post.likeCount,
+      likedByCurrent: false,
     };
   }
 }

@@ -44,6 +44,13 @@ export class UserRepository extends Database {
     });
   }
 
+  public async findOneRequest(id: string, authUserId: string) {
+    return await this.collection.findOne({
+      _id: new ObjectId(id),
+      request: new ObjectId(authUserId),
+    });
+  }
+
   public async findOne4(id: string) {
     return await this.collection.findOne({ _id: new ObjectId(id) }, { projection: { supportingCount: 1, isPublic: 1 } });
   }
@@ -113,6 +120,16 @@ export class UserRepository extends Database {
     );
   }
 
+  public async updateOneRemoveRequest(id: string, authUserId: string) {
+    return await this.collection.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $pull: { request: new ObjectId(authUserId) } as any,
+        $inc: { requestCount: -1 },
+      }
+    );
+  }
+
   public async updateOne6(id: string, authUserId: string) {
     return await this.collection.updateOne(
       { _id: new ObjectId(id) },
@@ -143,7 +160,12 @@ export class UserRepository extends Database {
   }
 
   public async updateOne10(id: string) {
-    return await this.collection.updateOne({ notification: new ObjectId(id) }, { $pull: { notification: new ObjectId(id) } as any });
+    return await this.collection.updateOne({ notification: new ObjectId(id) },
+      {
+        $pull: { notification: new ObjectId(id) } as any,
+        $inc: { notificationCount: -1 }
+      }
+    );
   }
 
   public async updateOne11(id: string, data: DocInterface) {

@@ -21,16 +21,15 @@ export class ImageService {
     // }
     // return uploadService.handle(file);
   }
-  static async remove(key: string | string[]) {
-    if (Array.isArray(key)) {
-      key.forEach(async (k) => {
-        await ImageService.remove(k);
-      });
+  static async remove(key: string | string[]): Promise<boolean[]> {
+    if (!Array.isArray(key)) {
+      return await this.remove([key] as string[]);
     }
-    const path = await ImageService.get(key as string);
-    if (path) {
-      fs.rmSync(path);
-    }
+    return await Promise.all(key.map(k => CloudStorage.remove(k)));
+    // const path = await ImageService.get(key as string);
+    // if (path) {
+    //   fs.rmSync(path);
+    // }
   }
   static async replace(key: string, file: Express.Multer.File) {
     if (!file) {

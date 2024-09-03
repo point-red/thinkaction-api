@@ -24,9 +24,23 @@ export default class UpdateResolutionsService {
     }
 
     const photos = data.photos;
+    let uploadedImages = [];
     if (photos) {
-      data.photo = await ImageService.replace(post.photo, photos);
+      uploadedImages.push(...await ImageService.move(photos));
     }
+
+    if (data.removedImages && Array.isArray(data.removedImages)) {
+      const removed = [];
+      for (const image of data.removedImages) {
+        if (typeof image === 'string' && post.photo?.includes(image)) {
+          removed.push(image);
+          post.photo.splice(post.photo.indexOf(image));
+        }
+      }
+      ImageService.remove(removed);
+    }
+
+    data.photo = [...post.photo, ...uploadedImages];
 
     const postEntity = new PostEntity({
       _id: post._id,
@@ -34,7 +48,7 @@ export default class UpdateResolutionsService {
       categoryResolutionId: post.categoryResolutionId,
       type: post.type,
       caption: data.caption ?? post.caption,
-      photo: data.photo ?? post.photo,
+      photo: data.photo,
       like: [],
       likeCount: 0,
       commentCount: 0,

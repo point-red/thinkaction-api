@@ -24,11 +24,13 @@ export default class GetOneUserService {
       goalsPerformance: 1,
       isAuthenticatedUser: 1,
       isSupporting: 1,
+      isRequesting: 1,
     }
 
     if (isAuthenticatedUser) {
       project.notificationCount = 1;
       project.requestCount = 1;
+      project.password = 1;
     }
 
     const pipeline = [
@@ -42,6 +44,9 @@ export default class GetOneUserService {
               isSupporting: {
                 $in: [new ObjectId(authUserId), '$supporter'],
               },
+              isRequesting: {
+                $in: [new ObjectId(authUserId), '$request'],
+              }
             }),
         },
       },
@@ -51,6 +56,10 @@ export default class GetOneUserService {
     ];
 
     const result = await this.userRepository.aggregate(pipeline);
+    if (isAuthenticatedUser) {
+      result[0].needsPassword = !result[0].password.length;
+      delete result[0].password;
+    }
 
     return result[0];
   }

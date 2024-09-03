@@ -24,7 +24,7 @@ import GetImageService from '../../services/images/get-image.service';
 import os from 'os';
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ storage, limits: { fileSize: Number(process.env.MAX_FILE_SIZE ?? '3000000') } });
 
 const router = Router();
 

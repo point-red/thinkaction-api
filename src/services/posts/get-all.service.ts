@@ -11,6 +11,29 @@ export default class GetAllPostService {
   }
 
   public async handle(authUserId: string, data: DocInterface) {
+
+    const sortStage: any = {
+      $sort: {},
+    };
+
+    if (data.sort && data.order) {
+      const sortField = data.sort;
+      const sortOrder = data.order === 'asc' ? 1 : -1;
+
+      sortStage.$sort = {
+        [sortField]: sortOrder,
+      }
+    } else if (!data.sort && data.order) {
+      const sortOrder = data.order === 'asc' ? 1 : -1;
+      sortStage.$sort = {
+        createdDate: sortOrder,
+      }
+    } else {
+      sortStage.$sort = {
+        createdDate: -1,
+      }
+    }
+
     const pipeline = [
       {
         $match: {
@@ -69,7 +92,9 @@ export default class GetAllPostService {
           userInfo: {
             $arrayElemAt: ['$userInfo', 0],
           },
-          likedByCurrent: new ObjectId(authUserId)
+          likedByCurrent: {
+            "$in": [new ObjectId(authUserId), '$like']
+          }
         },
       },
       {
@@ -98,6 +123,7 @@ export default class GetAllPostService {
           },
         },
       },
+      sortStage,
       {
         $facet: {
           metadata: [{ $count: 'totalCount' }],
@@ -106,40 +132,13 @@ export default class GetAllPostService {
       },
     ];
 
-    if (data.sort && data.order) {
-      const sortField = data.sort;
-      const sortOrder = data.order === 'asc' ? 1 : -1;
-
-      const sortStage: any = {
-        $sort: {
-          [sortField]: sortOrder,
-        },
-      };
-      pipeline.push(sortStage);
-    } else if (!data.sort && data.order) {
-      const sortOrder = data.order === 'asc' ? 1 : -1;
-      const sortStage: any = {
-        $sort: {
-          createdDate: sortOrder,
-        },
-      };
-      pipeline.push(sortStage);
-    } else {
-      const sortStage: any = {
-        $sort: {
-          createdDate: -1,
-        },
-      };
-      pipeline.push(sortStage);
-    }
-
     const allPost = await this.postRepository.aggregate(pipeline);
 
     return {
       total: allPost[0].metadata[0]?.totalCount ?? 0,
       page: Number(data.page),
       limit: Number(data.limit),
-      data: allPost[0].data
+      data: allPost[0].data,
     }
   }
 }

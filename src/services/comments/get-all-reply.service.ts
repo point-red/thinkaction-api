@@ -50,6 +50,11 @@ export default class GetAllReplyService {
           createdDate: 1,
         },
       },
+      {
+        $sort: {
+          createdDate: -1,
+        }
+      }
     ];
 
     const getAllReply = await this.commentRepository.aggregate(pipeline);

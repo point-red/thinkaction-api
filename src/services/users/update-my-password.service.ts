@@ -18,9 +18,17 @@ export default class UpdateMyPasswordUserService {
       throw new ResponseError(404, 'User not found');
     }
 
-    const passwordMatch = await bcrypt.compare(data.passwordCurrent, userNow.password);
-    if (!passwordMatch) {
-      throw new ResponseError(400, 'Current password is wrong');
+    const userHasPassword = !!userNow.password;
+
+    if (!data.passwordNew?.length || (userHasPassword && !data.passwordCurrent?.length)) {
+      throw new ResponseError(400, 'Password is required');
+    }
+
+    if (userHasPassword) {
+      const passwordMatch = await bcrypt.compare(data.passwordCurrent, userNow.password);
+      if (!passwordMatch) {
+        throw new ResponseError(400, 'Current password is wrong');
+      }
     }
 
     const hashedPass = await bcrypt.hash(data.passwordNew, 12);

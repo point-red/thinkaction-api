@@ -240,7 +240,7 @@ export default class UserController {
 
       const result: any = await this.supportAnotherUserService.handle(userId, authUserId);
 
-      return res.status(200).json({ status: 'success', message: result.isPublic ? 'User is now supported' : 'Support request sent successfully', data: result });
+      return res.status(200).json({ status: 'success', type: result.type, message: result.isPublic ? 'User is now supported' : 'Support request sent successfully', data: result });
     } catch (e) {
       next(e);
     }
@@ -274,10 +274,10 @@ export default class UserController {
 
   public async rejectSupportRequest(req: any, res: Response, next: NextFunction) {
     try {
-      const { userId } = req.body;
+      const { userId, notificationId } = req.body;
       const authUserId = req.userData._id;
 
-      const result: any = await this.rejectSupportRequestService.handle(userId, authUserId);
+      const result: any = await this.rejectSupportRequestService.handle(userId, authUserId, notificationId);
 
       return res.status(200).json({ status: 'success', message: 'Support request rejected successfully', data: result });
     } catch (e) {

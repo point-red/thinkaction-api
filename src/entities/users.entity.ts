@@ -59,7 +59,7 @@ export class UserEntity {
     };
   }
 
-  CheckData() {
+  CheckData(usePassword = true) {
     const errors: { [key: string]: string } = {};
 
     if (this.user._id && typeof this.user._id !== 'string') {
@@ -80,10 +80,12 @@ export class UserEntity {
       errors.email = 'Invalid email format';
     }
 
-    if (!this.user.password) {
-      errors.password = 'Password is required.';
-    } else if (typeof this.user.password !== 'string') {
-      errors.password = 'Password must be a string.';
+    if (usePassword) {
+      if (!this.user.password) {
+        errors.password = 'Password is required.';
+      } else if (typeof this.user.password !== 'string') {
+        errors.password = 'Password must be a string.';
+      }
     }
 
     if (this.user.fullname && typeof this.user.fullname !== 'string') {

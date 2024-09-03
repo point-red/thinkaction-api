@@ -16,6 +16,6 @@ const uploadImageService = new UploadImageService()
 const imageController = new ImageController(getImageService, uploadImageService)
 
 router.get('/:key', (req, res, next) => imageController.getImage(req, res, next));
-router.post('/upload', upload.single('image'), (req, res, next) => imageController.uploadImage(req, res, next))
+// router.post('/upload', upload.single('image'), (req, res, next) => imageController.uploadImage(req, res, next))
 
 export default router;

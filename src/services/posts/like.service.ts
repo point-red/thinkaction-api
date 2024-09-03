@@ -25,6 +25,7 @@ export default class LikePostService {
     return {
       _id: data.postId,
       likeCount: post.likeCount,
+      likedByCurrent: true,
     };
   }
 }

@@ -71,12 +71,16 @@ export default class AuthController {
           image = null;
         }
       }
+
+      const username = payload.email.substring(0, payload.email.indexOf('@'));
       user = await this.createUserService.handle({
-        username: payload.email,
+        username: username,
         email: payload.email,
         fullname: payload.name,
+        bio: '',
         photo: image,
-        password: Math.random().toFixed(32).substring(2)
+        password: '',
+        usePassword: false,
       });
     }
     const newPayload = {
@@ -106,6 +110,7 @@ export default class AuthController {
           fullname: user.fullname,
           email: user.email,
           bio: user.bio,
+          needsPassword: !user.password?.length,
           supporterCount: user.supporterCount,
           supportingCount: user.supportingCount,
           photo: user.photo,
@@ -158,6 +163,7 @@ export default class AuthController {
             _id: user._id,
             username: user.username,
             fullname: user.fullname,
+            needsPassword: !user.password?.length,
             email: user.email,
             bio: user.bio,
             supporterCount: user.supporterCount,

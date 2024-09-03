@@ -18,12 +18,15 @@ export default class AcceptSupportRequestService {
       throw new ResponseError(400, 'User not found or not requested');
     }
 
-    await this.userRepository.updateOne6(id, authUserId);
+    await this.userRepository.updateOne6(authUserId, id);
 
-    await this.userRepository.updateOne2(id, authUserId);
+    await this.userRepository.updateOne2(authUserId, id);
+    await this.userRepository.updateOneRemoveRequest(authUserId, id);
+
     await this.notificationRepository.update(notificationId, {
       type: 'message',
       message: `${userToAccept.username} has supported you`,
+      status: 'done',
       date: new Date(),
     });
 

@@ -16,7 +16,11 @@ export default class CreateUserService {
       throw new ResponseError(400, 'Email already registered');
     }
 
-    const hashedPass = await bcrypt.hash(data.password, 12);
+    let hashedPass = '';
+
+    if (data.password) {
+      hashedPass = await bcrypt.hash(data.password, 12);
+    }
 
     const userEntity = new UserEntity({
       username: data.username,
@@ -39,7 +43,7 @@ export default class CreateUserService {
       isPublic: true,
     });
 
-    let userData = userEntity.CheckData();
+    let userData = userEntity.CheckData(data.usePassword !== false);
 
     let user = await this.userRepository.create(userData);
 
@@ -53,6 +57,7 @@ export default class CreateUserService {
       _id: dataUser._id,
       username: dataUser.username,
       fullname: dataUser.fullname,
+      password: dataUser.password,
       email: dataUser.email,
       bio: dataUser.bio,
       supporterCount: dataUser.supporterCount,

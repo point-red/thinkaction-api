@@ -13,7 +13,7 @@ export default class GetAllCommentService {
   public async handle(postId: string) {
     const pipeline = [
       {
-        $match: { postId: new ObjectId(postId) },
+        $match: { postId: new ObjectId(postId), type: 'comment' },
       },
       {
         $lookup: {
@@ -38,6 +38,11 @@ export default class GetAllCommentService {
           createdDate: 1,
         },
       },
+      {
+        $sort: {
+          createdDate: -1,
+        }
+      }
     ];
 
     const getAllComment = await this.commentRepository.aggregate(pipeline);

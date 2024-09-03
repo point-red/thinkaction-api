@@ -85,7 +85,7 @@ export default class PostController {
       //     photo: (post as Record<string, any>).userInfo.photo ? await this.getImageService.handle((post as Record<string, any>).userInfo.photo) : ''
       //   }
       // })))
-      return res.status(200).json({ status: 'success', data: result.data });
+      return res.status(200).json({ status: 'success', ...result, data: result.data });
     } catch (e) {
       next(e);
     }

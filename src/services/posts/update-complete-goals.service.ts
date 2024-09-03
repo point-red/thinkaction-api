@@ -18,10 +18,28 @@ export default class UpdateCompleteGoalsService {
   public async handle(data: DocInterface, authUserId: string, id: string) {
     const post = await this.postRepository.readOne(id);
 
-    const photos = data.photos;
-    if (photos) {
-      data.photo = await ImageService.move(photos);
+    if (!post) {
+      throw new ResponseError(400, 'Post not found');
     }
+
+    const photos = data.photos;
+    let uploadedImages = [];
+    if (photos) {
+      uploadedImages.push(...await ImageService.move(photos));
+    }
+
+    if (data.removedImages && Array.isArray(data.removedImages)) {
+      const removed = [];
+      for (const image of data.removedImages) {
+        if (typeof image === 'string' && post.photo?.includes(image)) {
+          removed.push(image);
+          post.photo.splice(post.photo.indexOf(image));
+        }
+      }
+      ImageService.remove(removed);
+    }
+
+    data.photo = [...post.photo, ...uploadedImages];
 
     if (!post) {
       throw new ResponseError(400, 'Post not found');
@@ -33,7 +51,7 @@ export default class UpdateCompleteGoalsService {
       categoryResolutionId: data.categoryResolutionId ? new ObjectId(data.categoryResolutionId) : post.categoryResolutionId,
       type: post.type,
       caption: data.caption ?? post.caption,
-      photo: post.photo,
+      photo: data.photo,
       like: [],
       likeCount: 0,
       commentCount: 0,

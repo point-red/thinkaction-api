@@ -27,9 +27,12 @@ export default class SupportAnotherUserService {
       throw new ResponseError(400, 'User not found or already supported');
     }
 
+    let type = 'support';
+
     if (userToSupport.isPublic) {
       const notification = await notificationRepository.create({
-        type: 'message',
+        type: 'support',
+        toUserId: new ObjectId(id),
         fromUserId: new ObjectId(authUser._id),
         message: `${authUser.username} has supported you`,
         date: new Date(),
@@ -43,6 +46,7 @@ export default class SupportAnotherUserService {
     } else {
       const notification = await notificationRepository.create({
         type: 'request',
+        toUserId: new ObjectId(id),
         fromUserId: new ObjectId(authUser._id),
         message: `${authUser.username} wants to support you`,
         status: 'pending',
@@ -52,9 +56,14 @@ export default class SupportAnotherUserService {
       const notificationId: any = notification.insertedId;
 
       await this.userRepository.updateOne3(id, authUserId, notificationId);
+      type = 'request';
     }
 
     const updatedUser = await this.userRepository.findOne2(id);
+
+    if (updatedUser) {
+      updatedUser.type = type;
+    }
 
     return updatedUser;
   }
