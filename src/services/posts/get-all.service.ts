@@ -98,6 +98,26 @@ export default class GetAllPostService {
         },
       },
       {
+        $match: {
+          $expr: {
+            $or: [
+              { // Supporter Posts
+                $and: [
+                  { $eq: ["$shareWith", "supporter"] },
+                  { $in: [new ObjectId(authUserId), "$userInfo.supporter"] }
+                ]
+              },
+              { // Public Posts
+                $eq: ["$shareWith", "everyone"]
+              },
+              { // Private Posts or all
+                $eq: ["$userId", new ObjectId(authUserId)]
+              }
+            ]
+          }
+        }
+      },
+      {
         $project: {
           _id: 1,
           userId: 1,

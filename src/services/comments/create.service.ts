@@ -5,17 +5,29 @@ import { ResponseError } from '../../middleware/error.middleware';
 import { UserRepository } from '../../repositories/user.repository';
 import { ObjectId } from 'mongodb';
 import { PostRepository } from '../../repositories/post.repository';
+import { NotificationRepository } from '../../repositories/notification.repository';
 
 export default class CreateCommentService {
   private commentRepository: CommentRepository;
   private postRepository: PostRepository;
+  private notificationRepository: NotificationRepository;
+  private userRepository: UserRepository;
 
-  constructor(commentRepository: CommentRepository, postRepository: PostRepository) {
+  constructor(commentRepository: CommentRepository, postRepository: PostRepository, notificationRepository: NotificationRepository, userRepository: UserRepository) {
     this.commentRepository = commentRepository;
     this.postRepository = postRepository;
+    this.notificationRepository = notificationRepository;
+    this.userRepository = userRepository;
   }
 
   public async handle(data: DocInterface, id: string) {
+
+    const authUser = await this.userRepository.readOne(id);
+    const post = await this.postRepository.readOne(data.postId);
+
+    if (!authUser || !post) {
+      throw new ResponseError(404, "Post or User not found");
+    }
     const commentEntity = new CommentEntity({
       userId: new ObjectId(id),
       postId: new ObjectId(data.postId),
@@ -37,11 +49,24 @@ export default class CreateCommentService {
     if (!dataComment) {
       throw new ResponseError(404, 'Comment not found');
     }
-    const userRepository = new UserRepository();
-    const userData = await userRepository.readOne(id);
 
-    if (!userData) {
-      throw new ResponseError(404, 'User not found');
+
+    // Handle Notifications:
+    if (post.userId.toString() !== id && comment.insertedId) {
+      const notification = await this.notificationRepository.create({
+        type: 'comment',
+        toUserId: post.userId,
+        commentId: comment.insertedId,
+        commentExcerpt: data.message.substring(0, 32),
+        toPostId: post._id,
+        fromUserId: authUser._id,
+        message: `${authUser.username} commented your post`,
+        date: new Date(),
+      });
+
+      const notificationId: any = notification.insertedId;
+
+      await this.userRepository.updateOneNotify(notificationId, post.userId.toString());
     }
 
     return {
@@ -50,8 +75,8 @@ export default class CreateCommentService {
       userId: dataComment.userId,
       userInfo: {
         _id: id,
-        username: userData.username,
-        photo: userData.photo,
+        username: authUser.username,
+        photo: authUser.photo,
       },
       message: dataComment.message,
       type: dataComment.type,

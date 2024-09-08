@@ -26,6 +26,7 @@ export default class GetAllNotificationService {
           _id: '$notificationData._id',
           type: '$notificationData.type',
           fromUserId: '$notificationData.fromUserId',
+          toPostId: '$notificationData.toPostId',
           message: '$notificationData.message',
           date: '$notificationData.date',
           status: '$notificationData.status',
@@ -33,22 +34,22 @@ export default class GetAllNotificationService {
       },
       {
         $lookup: {
-            from: 'users',
-            localField: 'fromUserId',
-            foreignField: '_id',
-            as: 'fromUser'
+          from: 'users',
+          localField: 'fromUserId',
+          foreignField: '_id',
+          as: 'fromUser'
         }
-      }, 
+      },
       {
         $unwind: {
           path: '$fromUser',
         }
-      }, 
+      },
       {
         $addFields: {
-            'fromUser.isSupporting': {
-                $in: [new ObjectId(id), '$fromUser.supporter']
-            }
+          'fromUser.isSupporting': {
+            $in: [new ObjectId(id), '$fromUser.supporter']
+          }
         }
       },
       {
@@ -58,6 +59,7 @@ export default class GetAllNotificationService {
           type: 1,
           message: 1,
           fromUserId: 1,
+          toPostId: 1,
           status: 1,
           fromUser: {
             id: 1,

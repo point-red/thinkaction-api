@@ -186,6 +186,15 @@ export class UserRepository extends Database {
     );
   }
 
+  public async updateOneNotify(id: string, userId: string) {
+    return await this.collection.updateOne({ _id: new ObjectId(userId) },
+      {
+        $push: { notification: new ObjectId(id) } as any,
+        $inc: { notificationCount: 1 }
+      }
+    );
+  }
+
   public async updateOne11(id: string, data: DocInterface) {
     return await this.collection.updateOne({ _id: new ObjectId(id) }, {
       $push: { categoryResolution: data } as any

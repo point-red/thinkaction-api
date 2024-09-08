@@ -12,7 +12,10 @@ export default class GetHistoryService {
     const pipeline = [
       {
         '$match': {
-          '_id': new ObjectId(authUserId)
+          '_id': new ObjectId(authUserId),
+          "historyAccount": {
+            $exists: 1
+          }
         }
       }, {
         '$project': {
@@ -106,6 +109,10 @@ export default class GetHistoryService {
     ];
 
     const result = (await this.userRepository.aggregate(pipeline));
+
+    if (!result?.[0]?._id) {
+      return [];
+    }
 
     return result;
   }

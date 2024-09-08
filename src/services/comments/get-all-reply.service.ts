@@ -43,6 +43,7 @@ export default class GetAllReplyService {
           'userInfo._id': 1,
           'userInfo.username': 1,
           'userInfo.photo': 1,
+          'userInfo.fullname': 1,
           message: 1,
           replyCount: 1,
           type: 1,

@@ -57,9 +57,9 @@ export default class CreateResolutionService {
       }
     ])
 
-    // if (totalPosts.length >= 7) {
-    //   throw new ResponseError(400, 'Resolutions cannot be more than 7');
-    // }
+    if (totalPosts.length >= 7) {
+      throw new ResponseError(400, 'Resolutions cannot be more than 7');
+    }
 
     const postEntity = new PostEntity({
       userId: new ObjectId(authUserId),

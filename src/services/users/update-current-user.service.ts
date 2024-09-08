@@ -50,7 +50,7 @@ export default class UpdateCurrentUserService {
       isUpdating: userNow.isUpdating,
     });
 
-    let userData = userEntity.CheckData();
+    let userData = userEntity.CheckData(false);
 
     await this.userRepository.update(id, userData);
 

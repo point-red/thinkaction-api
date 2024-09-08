@@ -19,6 +19,8 @@ import GetYearReportService from '../../services/posts/get-year-report.service';
 import multer from 'multer';
 import os from 'os';
 import dotenv from 'dotenv';
+import { NotificationRepository } from '../../repositories/notification.repository';
+import { UserRepository } from '../../repositories/user.repository';
 
 dotenv.config();
 
@@ -27,6 +29,9 @@ const upload = multer({ storage, limits: { fileSize: Number(process.env.MAX_FILE
 const router = Router();
 
 const postRepository = new PostRepository();
+const notificationRepository = new NotificationRepository();
+const userRepository = new UserRepository();
+
 const getAllPost = new GetAllPostService(postRepository);
 const getOnePost = new GetOnePostService(postRepository);
 const getAllLikePost = new GetAllLikePostService(postRepository);
@@ -36,8 +41,8 @@ const createCompleteGoals = new CreateCompleteGoalsService(postRepository);
 const updateResolutions = new UpdateResolutionsService(postRepository);
 const updateWeeklyGoals = new UpdateWeeklyGoalsService(postRepository);
 const updateCompleteGoals = new UpdateCompleteGoalsService(postRepository);
-const likePost = new LikePostService(postRepository);
-const unlikePost = new UnlikePostService(postRepository);
+const likePost = new LikePostService(postRepository, notificationRepository, userRepository);
+const unlikePost = new UnlikePostService(postRepository, notificationRepository, userRepository);
 const getMonthlyReport = new GetMonthlyReportService(postRepository);
 const getYearReport = new GetYearReportService(postRepository);
 const deletePost = new DeletePostService(postRepository);
