@@ -72,11 +72,11 @@ export default class AuthController {
         }
       }
 
-      let username = 'user_' + Math.random().toFixed(2).substring(3, 19);
+      let username = 'user_' + Math.random().toFixed(30).substring(3, 19);
       let i = 0;
 
       while (await this.userRepository.getUserByUsername(username)) {
-        username = 'user_' + Math.random().toFixed(2).substring(3, 19);
+        username = 'user_' + Math.random().toFixed(30).substring(3, 19);
         i++;
         if (i > 10) {
           throw new Error('Some error occurred while generating username');
