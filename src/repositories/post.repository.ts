@@ -12,7 +12,12 @@ export class PostRepository extends Database {
   }
 
   public async readOne(id: string) {
-    return await this.collection.findOne({ _id: new ObjectId(id) });
+    return await this.collection.findOne({
+      $or: [
+        { _id: new ObjectId(id), },
+        { categoryResolutionId: new ObjectId(id), }
+      ]
+    });
   }
 
   public async update(id: string, data: DocInterface) {

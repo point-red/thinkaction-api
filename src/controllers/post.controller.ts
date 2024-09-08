@@ -255,8 +255,9 @@ export default class PostController {
   public async deletePost(req: any, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+      const authUserId = req.userData._id;
 
-      const result = await this.deletePostService.handle(id);
+      const result = await this.deletePostService.handle(id, authUserId);
 
       return res.status(200).json({});
     } catch (e) {

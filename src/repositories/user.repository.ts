@@ -211,6 +211,21 @@ export class UserRepository extends Database {
     }
   }
 
+  public async removeCategory(id: string, authUserId: string) {
+    return await this.collection.updateOne(
+      {
+        _id: new ObjectId(authUserId),
+      },
+      {
+        $pull: {
+          categoryResolution: {
+            _id: new ObjectId(id)
+          },
+        } as any,
+      }
+    );
+  }
+
   public async delete(id: string) {
     return await this.collection.deleteOne({ _id: new ObjectId(id) });
   }
