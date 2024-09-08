@@ -72,7 +72,17 @@ export default class AuthController {
         }
       }
 
-      const username = payload.email.substring(0, payload.email.indexOf('@'));
+      let username = 'user_' + Math.random().toFixed(2).substring(3, 19);
+      let i = 0;
+
+      while (await this.userRepository.getUserByUsername(username)) {
+        username = 'user_' + Math.random().toFixed(2).substring(3, 19);
+        i++;
+        if (i > 10) {
+          throw new Error('Some error occurred while generating username');
+        }
+      }
+
       user = await this.createUserService.handle({
         username: username,
         email: payload.email,

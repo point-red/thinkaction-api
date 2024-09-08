@@ -67,6 +67,10 @@ export class UserRepository extends Database {
     return await this.collection.findOne({ email: email });
   }
 
+  public async getUserByUsername(username: string) {
+    return await this.collection.findOne({ username: username });
+  }
+
   public async update(id: string, data: DocInterface) {
     return await this.collection.updateOne(
       {
