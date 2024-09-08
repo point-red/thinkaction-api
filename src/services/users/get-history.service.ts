@@ -11,22 +11,101 @@ export default class GetHistoryService {
   public async handle(authUserId: string) {
     const pipeline = [
       {
-        $match: { _id: new ObjectId(authUserId) },
-      },
-      {
-        $project: {
-          historyAccount: { $slice: ['$historyAccount', -5] },
-        },
-      },
-      {
-        $unwind: '$historyAccount',
-      },
-      {
-        $replaceRoot: { newRoot: '$historyAccount' },
-      },
+        '$match': {
+          '_id': new ObjectId(authUserId)
+        }
+      }, {
+        '$project': {
+          'historyAccount': {
+            '$slice': [
+              '$historyAccount', 7
+            ]
+          },
+          'supporting': 1
+        }
+      }, {
+        '$lookup': {
+          'from': 'users',
+          'localField': 'historyAccount',
+          'foreignField': '_id',
+          'as': 'unsortedAccounts'
+        }
+      }, {
+        '$addFields': {
+          'accounts': {
+            '$map': {
+              'input': '$historyAccount',
+              'as': 'id',
+              'in': {
+                '$arrayElemAt': [
+                  {
+                    '$filter': {
+                      'input': '$unsortedAccounts',
+                      'as': 'detail',
+                      'cond': {
+                        '$eq': [
+                          '$$detail._id', '$$id'
+                        ]
+                      }
+                    }
+                  }, 0
+                ]
+              }
+            }
+          }
+        }
+      }, {
+        '$addFields': {
+          'accounts': {
+            'currentSupporting': '$supporting'
+          }
+        }
+      }, {
+        '$unwind': {
+          'path': '$accounts'
+        }
+      }, {
+        '$replaceRoot': {
+          'newRoot': '$accounts'
+        }
+      }, {
+        '$addFields': {
+          'mutualSupporter': {
+            '$filter': {
+              'input': '$supporter',
+              'as': 'id',
+              'cond': {
+                '$in': [
+                  '$$id', '$currentSupporting'
+                ]
+              }
+            }
+          }
+        }
+      }, {
+        '$lookup': {
+          'from': 'users',
+          'localField': 'mutualSupporter',
+          'foreignField': '_id',
+          'as': 'supportedBy'
+        }
+      }, {
+        '$project': {
+          '_id': 1,
+          'fullname': 1,
+          'username': 1,
+          'photo': 1,
+          'supportedByCount': 1,
+          'supportedBy': {
+            '_id': 1,
+            'fullname': 1,
+            'username': 1
+          }
+        }
+      }
     ];
 
-    const result = (await this.userRepository.aggregate(pipeline)).reverse();
+    const result = (await this.userRepository.aggregate(pipeline));
 
     return result;
   }

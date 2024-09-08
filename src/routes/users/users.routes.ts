@@ -22,6 +22,7 @@ import multer from 'multer';
 import { NotificationRepository } from '../../repositories/notification.repository';
 import GetImageService from '../../services/images/get-image.service';
 import os from 'os';
+import CreateHistoryService from '../../services/users/create-history.service';
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage, limits: { fileSize: Number(process.env.MAX_FILE_SIZE ?? '3000000') } });
@@ -45,6 +46,7 @@ const unsupportAnotherUser = new UnsupportAnotherUserService(userRepository);
 const acceptSupportRequest = new AcceptSupportRequestService(userRepository, notificationRepository);
 const rejectSupportRequest = new RejectSupportRequestService(userRepository, notificationRepository);
 const searchUser = new SearchUserService(userRepository);
+const createHistory = new CreateHistoryService(userRepository);
 const getHistory = new GetHistoryService(userRepository);
 const deleteHistory = new DeleteHistoryService(userRepository);
 const userController = new UserController(
@@ -61,6 +63,7 @@ const userController = new UserController(
   acceptSupportRequest,
   rejectSupportRequest,
   searchUser,
+  createHistory,
   getHistory,
   deleteHistory,
   getImage
@@ -87,6 +90,8 @@ router.get('/request', verifyUser, (req, res, next) => userController.getCurrent
 router.get('/notification', verifyUser, (req, res, next) => userController.getCurrentUserNotification(req, res, next));
 
 router.get('/search', verifyUser, (req, res, next) => userController.searchUser(req, res, next));
+
+router.post('/history', verifyUser, (req, res, next) => userController.addHistory(req, res, next));
 
 router.get('/history', verifyUser, (req, res, next) => userController.getHistory(req, res, next));
 

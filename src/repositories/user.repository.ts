@@ -44,6 +44,14 @@ export class UserRepository extends Database {
     });
   }
 
+  public async findOneHistory(authUserId: string) {
+    return await this.collection.findOne({
+      id: new ObjectId(authUserId),
+    }, {
+      projection: { historyAccount: 1 }
+    })
+  }
+
   public async findOneRequest(id: string, authUserId: string) {
     return await this.collection.findOne({
       _id: new ObjectId(id),
@@ -68,6 +76,10 @@ export class UserRepository extends Database {
         $set: data,
       }
     );
+  }
+
+  public async updateRemoveHistory(id: string, authUserId: string) {
+    return await this.collection.updateOne({ _id: new ObjectId(authUserId) }, { $pull: { historyAccount: new ObjectId(id) as any } });
   }
 
   public async updateOne(id: string, authUserId: string, notificationId: string) {
@@ -151,8 +163,10 @@ export class UserRepository extends Database {
     );
   }
 
-  public async updateOne8(data: any, authUserId: string) {
-    return await this.collection.updateOne({ _id: new ObjectId(authUserId) }, { $addToSet: { historyAccount: data[0] } });
+  public async updateOne8(id: string, authUserId: string) {
+    return await this.collection.updateOne({ _id: new ObjectId(authUserId) }, {
+      $push: { historyAccount: { $each: [new ObjectId(id)], $position: 0 } } as any
+    });
   }
 
   public async updateOne9(authUserId: string) {

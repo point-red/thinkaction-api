@@ -18,6 +18,7 @@ import GetHistoryService from '../services/users/get-history.service';
 import DeleteHistoryService from '../services/users/delete-history.service';
 import GetImageService from '../services/images/get-image.service';
 import { ImageService } from '../services/images/image.service';
+import CreateHistoryService from '../services/users/create-history.service';
 
 dotenv.config();
 
@@ -37,7 +38,8 @@ export default class UserController {
   private searchUserService: SearchUserService;
   private getHistoryService: GetHistoryService;
   private deleteHistoryService: DeleteHistoryService;
-  private getImageService: GetImageService
+  private getImageService: GetImageService;
+  private addHistoryService: CreateHistoryService;
 
   constructor(
     createUserService: CreateUserService,
@@ -53,6 +55,7 @@ export default class UserController {
     acceptSupportRequestService: AcceptSupportRequestService,
     rejectSupportRequestService: RejectSupportRequestService,
     searchUserService: SearchUserService,
+    addHistoryService: CreateHistoryService,
     getHistoryService: GetHistoryService,
     deleteHistoryService: DeleteHistoryService,
     getImageService: GetImageService
@@ -70,6 +73,7 @@ export default class UserController {
     this.acceptSupportRequestService = acceptSupportRequestService;
     this.rejectSupportRequestService = rejectSupportRequestService;
     this.searchUserService = searchUserService;
+    this.addHistoryService = addHistoryService;
     this.getHistoryService = getHistoryService;
     this.deleteHistoryService = deleteHistoryService;
     this.getImageService = getImageService
@@ -293,6 +297,19 @@ export default class UserController {
       const result: any = await this.searchUserService.handle(username, authUserId);
 
       return res.status(200).json({ status: 'success', results: result.length, data: result });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async addHistory(req: any, res: Response, next: NextFunction) {
+    try {
+      const authUserId = req.userData._id;
+      const id = req.body.id;
+
+      await this.addHistoryService.handle(id, authUserId);
+
+      return res.status(200).json({ status: 'success', message: "Added history" });
     } catch (e) {
       next(e);
     }
