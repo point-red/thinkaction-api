@@ -16,13 +16,24 @@ export default class DeleteCommentService {
     const comment = await this.commentRepository.readOne(id);
 
     if (!comment) {
-      throw new ResponseError(404, 'Comment is not found');
+      throw new ResponseError(404, 'Comment not found');
     }
 
-    if (comment.userId.toString() !== authUserId) {
-      throw new ResponseError(400, 'Cannot delete comment, This is not your comment.');
+    if (comment.postId) {
+      const post = await this.postRepository.readOne(comment.postId);
+      if (!post) {
+        throw new ResponseError(404, 'Post not found');
+      }
+      if (post.userId.toString() !== authUserId) {
+        if (comment.userId.toString() !== authUserId) {
+          throw new ResponseError(400, 'Cannot delete comment, This is not your comment.');
+        }
+      }
+    } else {
+      throw new ResponseError(404, 'Post not found');
     }
 
+    const length = comment.type === 'reply' ? 1 : 1 + (comment.reply?.length ?? 0);
     if (comment.type === 'reply') {
       const pipeline = [
         {
@@ -38,16 +49,18 @@ export default class DeleteCommentService {
 
       let parentId: any = await this.commentRepository.aggregate(pipeline);
 
-      parentId = parentId[0]._id.toString();
+      if (parentId.length) {
+        parentId = parentId[0]._id.toString();
+        await this.commentRepository.update3(parentId, id);
+      }
 
-      await this.commentRepository.update3(parentId, id);
     } else if (comment.type === 'comment') {
       comment.reply.forEach(async (data: any) => {
         await this.commentRepository.delete(data.toString());
       });
     }
 
-    await this.postRepository.deleteCommentCount(comment.postId);
+    await this.postRepository.deleteCommentCount(comment.postId, length);
 
     return await this.commentRepository.delete(id);
   }

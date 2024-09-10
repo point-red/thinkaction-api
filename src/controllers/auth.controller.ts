@@ -141,11 +141,11 @@ export default class AuthController {
       const user = await this.userRepository.getUserByEmail(email.toLowerCase());
 
       if (!user) {
-        throw new ResponseError(401, 'Email not found');
+        throw new ResponseError(400, 'Email not found');
       }
 
       if (!(await bcrypt.compare(password, user.password))) {
-        throw new ResponseError(401, 'Password is wrong');
+        throw new ResponseError(400, 'Password is wrong');
       }
 
       const payload = {

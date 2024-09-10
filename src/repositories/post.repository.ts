@@ -29,8 +29,8 @@ export class PostRepository extends Database {
     return await this.collection.updateOne({ _id: new ObjectId(id) }, { $inc: { commentCount: 1 } });
   }
 
-  public async deleteCommentCount(id: string) {
-    return await this.collection.updateOne({ _id: new ObjectId(id) }, { $dec: { commentCount: 1 } });
+  public async deleteCommentCount(id: string, length: number) {
+    return await this.collection.updateOne({ _id: new ObjectId(id) }, { $inc: { commentCount: -1 * length } });
   }
 
   public async update3(id: string, authUserId: string) {
