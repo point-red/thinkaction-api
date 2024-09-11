@@ -24,6 +24,14 @@ export default class GetYearReportService {
         $unwind: '$categoryResolution',
       },
       {
+        $match: {
+          "categoryResolution.createdDate": {
+            $gte: startDate,
+            $lt: endDate
+          }
+        },
+      },
+      {
         $lookup: {
           from: 'posts',
           localField: 'categoryResolution._id',
@@ -31,7 +39,6 @@ export default class GetYearReportService {
           as: 'postsData',
         },
       },
-
       {
         $addFields: {
           postsData: {
@@ -41,22 +48,39 @@ export default class GetYearReportService {
               cond: { $eq: ['$$post.type', 'resolutions'] },
             },
           },
+          completeData: {
+            $filter: {
+              input: "$postsData",
+              as: "post",
+              $and: [
+                { $eq: ["$$post.type", "completeGoals"] },
+                { $eq: ["$$post.isComplete", true] },
+              ]
+            }
+          }
         },
       },
       {
         $unwind: '$postsData',
       },
       {
-        $project: {
-          _id: 1,
-          categoryResolution: {
-            $mergeObjects: ['$categoryResolution', { updatedDate: '$postsData.updatedDate' }],
-          },
+        $unwind: {
+          path: "$completeData",
+          preserveNullAndEmptyArrays: true
         },
       },
       {
-        $match: {
-          $and: [{ 'categoryResolution.createdDate': { $gte: startDate } }, { 'categoryResolution.createdDate': { $lte: endDate } }],
+        $project: {
+          _id: 1,
+          resolution: {
+            $mergeObjects: ["$categoryResolution", {
+              "updatedDate": "$postsData.updatedDate"
+            }, {
+                "dueDate": "$postsData.dueDate"
+              }, {
+                "completeDate": "$completeData.createdDate"
+              }]
+          }
         },
       },
     ];
@@ -64,60 +88,59 @@ export default class GetYearReportService {
     const userRepository = new UserRepository();
     const allPost = await userRepository.aggregate(pipeline);
 
-    function getWeeksInYear(year: number, allPost: any) {
-      const weeks: any = {};
-      let weekNumber = 1;
-      const totalCategories: any = {};
+    function getWeeksInYear(year: number) {
+      const weeks = [];
+      let startDate = new Date(year, 0, 1);
 
-      // Inisialisasi totalCategories untuk setiap kategori menjadi 0
-      allPost.forEach((item: any) => {
-        const categoryResolutionName = item.categoryResolution.name;
-        totalCategories[categoryResolutionName] = 0;
-      });
+      while (startDate.getDay() !== 1) {
+        startDate.setDate(startDate.getDate() + 1);
+      }
 
-      for (let month = 0; month < 12; month++) {
-        const startDate = new Date(year, month, 1);
-        const endDate = new Date(year, month + 1, 0);
-        let currentDate = new Date(startDate);
+      let endDate = new Date(startDate);
 
-        while (currentDate <= endDate) {
-          const startOfWeek = new Date(currentDate);
-          const endOfWeek = new Date(currentDate);
-          endOfWeek.setDate(endOfWeek.getDate() + 6);
+      while (startDate.getFullYear() <= year) {
+        endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 6);
 
-          const weekObj: any = {};
-          let trueCount = 0; // Deklarasi di dalam perulangan untuk setiap minggu
+        weeks.push({
+          weekNumber: weeks.length + 1,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate)
+        });
 
-          allPost.forEach((item: any) => {
-            const categoryResolutionName = item.categoryResolution.name;
-            if (item.categoryResolution.isComplete === true && item.categoryResolution.updatedDate <= endOfWeek) {
-              weekObj[categoryResolutionName] = true;
-              trueCount++; // Increment trueCount jika nilai true
-            } else if (item.categoryResolution.createdDate > endOfWeek) {
-              return;
-            } else {
-              weekObj[categoryResolutionName] = false;
-            }
-            totalCategories[categoryResolutionName]++; // Increment jumlah total kategori
-          });
-
-          // Menghitung persentase nilai true untuk setiap kategori
-          const percentage = trueCount / Object.keys(totalCategories).length;
-          weeks['percentage'] = percentage; // Menambahkan persentase ke dalam objek minggu
-
-          weeks[`week${weekNumber}`] = weekObj;
-
-          currentDate.setDate(currentDate.getDate() + 7);
-          weekNumber++;
-        }
+        startDate.setDate(startDate.getDate() + 7);
       }
 
       return weeks;
     }
 
-    const weeksInYear = getWeeksInYear(data.year, allPost);
-    console.log(weeksInYear);
+    const weeksInYear = getWeeksInYear(Number(data.year));
+    const map: Record<string, Record<string, boolean>> = {};
+    const currentDate = new Date();
+    const started: Record<string, boolean> = {};
+    const ended: Record<string, boolean> = {};
+    for (const { weekNumber, startDate, endDate } of weeksInYear) {
+      const weekStr = 'Week ' + weekNumber;
+      if (!map[weekStr]) {
+        map[weekStr] = {};
+      }
+      if (startDate > currentDate) {
+        continue;
+      }
+      for (const { resolution } of allPost) {
+        if (resolution.createdDate < endDate && !started[resolution.name]) {
+          started[resolution.name] = true;
+        }
+        if (started[resolution.name] && !ended[resolution.name]) {
+          const completed = resolution.isComplete && resolution.completeDate && resolution.completeDate < resolution.dueDate;
+          map[weekStr][resolution.name] = completed;
+        }
+        if (resolution.completeDate && resolution.completeDate < endDate) {
+          ended[resolution.name] = true;
+        }
+      }
+    }
 
-    return weeksInYear;
+    return map;
   }
 }

@@ -39,23 +39,12 @@ export default class CreateResolutionService {
     const totalPosts: any = await this.postRepository.aggregate([
       {
         $match: {
-          type: 'resolutions',
-        },
-      },
-      {
-        $match: {
           userId: new ObjectId(authUserId),
+          type: 'resolutions',
+          isComplete: false,
         },
       },
     ]);
-
-    const totalSameResolutions: any = this.postRepository.aggregate([
-      {
-        $match: {
-
-        }
-      }
-    ])
 
     if (totalPosts.length >= 7) {
       throw new ResponseError(400, 'Resolutions cannot be more than 7');

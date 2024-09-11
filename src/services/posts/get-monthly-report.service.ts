@@ -11,8 +11,8 @@ export default class GetMonthlyReportService {
   }
 
   public async handle(data: DocInterface, authUserId: string) {
-    const startDate = new Date(data.year, data.month - 1, 1);
-    const endDate = new Date(data.year, data.month, 0);
+    const startDate = new Date(data.year, 0, 1);
+    const endDate = new Date(data.year, 11, 31);
 
     const pipeline = [
       {
@@ -24,6 +24,14 @@ export default class GetMonthlyReportService {
         $unwind: '$categoryResolution',
       },
       {
+        $match: {
+          "categoryResolution.createdDate": {
+            $gte: startDate,
+            $lt: endDate
+          }
+        },
+      },
+      {
         $lookup: {
           from: 'posts',
           localField: 'categoryResolution._id',
@@ -31,7 +39,6 @@ export default class GetMonthlyReportService {
           as: 'postsData',
         },
       },
-
       {
         $addFields: {
           postsData: {
@@ -41,22 +48,41 @@ export default class GetMonthlyReportService {
               cond: { $eq: ['$$post.type', 'resolutions'] },
             },
           },
+          completeData: {
+            $filter: {
+              input: "$postsData",
+              as: "post",
+              cond: {
+                $and: [
+                  { $eq: ["$$post.type", "completeGoals"] },
+                  { $eq: ["$$post.isComplete", true] },
+                ]
+              }
+            }
+          }
         },
       },
       {
         $unwind: '$postsData',
       },
       {
-        $project: {
-          _id: 1,
-          categoryResolution: {
-            $mergeObjects: ['$categoryResolution', { updatedDate: '$postsData.updatedDate' }],
-          },
+        $unwind: {
+          path: "$completeData",
+          preserveNullAndEmptyArrays: true
         },
       },
       {
-        $match: {
-          $and: [{ 'categoryResolution.createdDate': { $gte: startDate } }, { 'categoryResolution.createdDate': { $lte: endDate } }],
+        $project: {
+          _id: 1,
+          resolution: {
+            $mergeObjects: ["$categoryResolution", {
+              "updatedDate": "$postsData.updatedDate"
+            }, {
+                "dueDate": "$postsData.dueDate"
+              }, {
+                "completeDate": "$completeData.createdDate"
+              }]
+          }
         },
       },
     ];
@@ -64,56 +90,67 @@ export default class GetMonthlyReportService {
     const userRepository = new UserRepository();
     const allPost = await userRepository.aggregate(pipeline);
 
-    function getWeeksInMonth(year: number, month: number, allPost: any) {
-      const weeks: any = {};
-      const totalCategories: any = {};
+    function getWeeksInMonth(year: number, month: number) {
+      const weeks = [];
 
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
-      let currentDate = new Date(startDate);
-      let weekNumber = 1;
+      let startDate = new Date(year, month, 1);
 
-      // Menginisialisasi totalCategories untuk setiap kategori menjadi 0
-      allPost.forEach((item: any) => {
-        const categoryResolutionName = item.categoryResolution.name;
-        totalCategories[categoryResolutionName] = 0;
-      });
+      const firstDayOfWeek = 1;
+      while (startDate.getDay() !== firstDayOfWeek) {
+        startDate.setDate(startDate.getDate() - 1);
+      }
 
-      while (currentDate <= endDate) {
-        const startOfWeek = new Date(currentDate);
-        const endOfWeek = new Date(currentDate);
-        endOfWeek.setDate(endOfWeek.getDate() + 6);
+      while (startDate.getMonth() <= month || startDate.getDate() <= 7) {
+        let endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 6);
 
-        const weekObj: any = {};
-        let trueCount = 0;
+        if (endDate.getMonth() !== month) {
+          break;
+        }
 
-        allPost.forEach((item: any) => {
-          const categoryResolutionName = item.categoryResolution.name;
-          if (item.categoryResolution.isComplete === true && item.categoryResolution.updatedDate <= endOfWeek) {
-            weekObj[categoryResolutionName] = true;
-            trueCount++; // Increment trueCount jika nilai true
-          } else if (item.categoryResolution.createdDate > endOfWeek) {
-            return;
-          } else {
-            weekObj[categoryResolutionName] = false;
-          }
-          totalCategories[categoryResolutionName]++; // Increment jumlah total kategori
+        if (startDate > endDate) {
+          break;
+        }
+
+        weeks.push({
+          weekNumber: weeks.length + 1,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate)
         });
 
-        const percentage = trueCount / Object.keys(totalCategories).length;
-        weeks['percentage'] = percentage;
-        weeks[`week${weekNumber}`] = weekObj;
-
-        currentDate.setDate(currentDate.getDate() + 7);
-        weekNumber++;
+        startDate.setDate(startDate.getDate() + 7);
       }
 
       return weeks;
     }
 
-    const weeksInMonth = getWeeksInMonth(data.year, data.month, allPost);
-    console.log(weeksInMonth);
+    const weeksInMonth = getWeeksInMonth(Number(data.year), Number(data.month) - 1);
+    const map: Record<string, Record<string, boolean>> = {};
+    const currentDate = new Date();
+    const started: Record<string, boolean> = {};
+    const ended: Record<string, boolean> = {};
+    for (const { weekNumber, startDate, endDate } of weeksInMonth) {
+      const weekStr = 'Week ' + weekNumber;
+      if (!map[weekStr]) {
+        map[weekStr] = {};
+      }
+      if (startDate > currentDate) {
+        continue;
+      }
+      for (const { resolution } of allPost) {
+        if (resolution.createdDate < endDate && !started[resolution.name]) {
+          started[resolution.name] = true;
+        }
+        if (started[resolution.name] && !ended[resolution.name]) {
+          const completed = resolution.isComplete && resolution.completeDate && resolution.completeDate < resolution.dueDate;
+          map[weekStr][resolution.name] = completed;
+        }
+        if (resolution.completeDate && resolution.completeDate < endDate) {
+          ended[resolution.name] = true;
+        }
+      }
+    }
 
-    return weeksInMonth;
+    return map;
   }
 }
