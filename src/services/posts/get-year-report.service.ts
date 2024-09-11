@@ -52,10 +52,12 @@ export default class GetYearReportService {
             $filter: {
               input: "$postsData",
               as: "post",
-              $and: [
-                { $eq: ["$$post.type", "completeGoals"] },
-                { $eq: ["$$post.isComplete", true] },
-              ]
+              cond: {
+                $and: [
+                  { $eq: ["$$post.type", "completeGoals"] },
+                  { $eq: ["$$post.isComplete", true] },
+                ]
+              }
             }
           }
         },
