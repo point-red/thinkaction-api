@@ -134,7 +134,7 @@ export default class GetYearReportService {
           started[resolution.name] = true;
         }
         if (started[resolution.name] && !ended[resolution.name]) {
-          const completed = resolution.isComplete && resolution.completeDate && resolution.completeDate < resolution.dueDate;
+          const completed = resolution.isComplete && resolution.completeDate && resolution.completeDate < resolution.dueDate && resolution.completeDate < endDate;
           map[weekStr][resolution.name] = completed;
         }
         if (resolution.completeDate && resolution.completeDate < endDate) {
