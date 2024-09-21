@@ -134,18 +134,18 @@ export default class GetMonthlyReportService {
       if (!map[weekStr]) {
         map[weekStr] = {};
       }
-      if (startDate > currentDate) {
-        continue;
-      }
       for (const { resolution } of allPost) {
+        const completed = resolution.isComplete && resolution.completeDate && resolution.completeDate < resolution.dueDate;
+        if (startDate > currentDate && !completed) {
+          continue;
+        }
         if (resolution.createdDate < endDate && !started[resolution.name]) {
           started[resolution.name] = true;
         }
         if (started[resolution.name] && !ended[resolution.name]) {
-          const completed = resolution.isComplete && resolution.completeDate && resolution.completeDate < resolution.dueDate && resolution.completeDate < endDate;
           map[weekStr][resolution.name] = completed;
         }
-        if (resolution.completeDate && resolution.completeDate < endDate) {
+        if (resolution.completeDate && resolution.completeDate < endDate && (!completed || resolution.dueDate < endDate)) {
           ended[resolution.name] = true;
         }
       }
