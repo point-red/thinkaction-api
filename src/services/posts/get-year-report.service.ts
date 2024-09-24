@@ -127,7 +127,7 @@ export default class GetYearReportService {
         map[weekStr] = {};
       }
       for (const { resolution } of allPost) {
-        const completed = resolution.isComplete && resolution.completeDate && resolution.completeDate < resolution.dueDate;
+        const completed = resolution.isComplete && resolution.completeDate;
         if (startDate > currentDate && !completed) {
           continue;
         }
