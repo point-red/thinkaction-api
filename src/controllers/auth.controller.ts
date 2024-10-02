@@ -43,7 +43,7 @@ export default class AuthController {
       try {
         req.body.credential = (await client.getToken(req.body.code))?.tokens?.id_token;
       } catch (e) {
-        return res.status(403).json({ message: "Login Failed", error: e });
+        return res.status(403).json({ message: "Login Failed" });
       }
     }
     const credentials = req.body.credential;
