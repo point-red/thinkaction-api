@@ -40,6 +40,7 @@ export default class GetOnePostService {
           _id: 1,
           userId: 1,
           categoryResolutionId: 1,
+          weeklyGoalId: 1,
           type: 1,
           caption: 1,
           photo: 1,

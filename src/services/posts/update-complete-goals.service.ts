@@ -88,7 +88,7 @@ export default class UpdateCompleteGoalsService {
     let updateResolutionsService = new UpdateResolutionsService(this.postRepository);
 
     const data2 = {
-      isComplete: dataPost.isComplete === 'true',
+      isComplete: dataPost.isComplete,
     };
 
     await updateResolutionsService.handle(data2, authUserId, categoryResolution[0]._id);

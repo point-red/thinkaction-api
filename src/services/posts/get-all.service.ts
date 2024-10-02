@@ -123,6 +123,7 @@ export default class GetAllPostService {
           userId: 1,
           categoryResolutionId: 1,
           type: 1,
+          weeklyGoalId: 1,
           caption: 1,
           photo: 1,
           likeCount: 1,

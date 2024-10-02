@@ -33,7 +33,7 @@ export default class GetOneUserService {
       project.password = 1;
     }
 
-    const pipeline = [
+    const pipeline: any[] = [
       { $match: { _id: new ObjectId(id) } },
       {
         $addFields: {
@@ -50,10 +50,56 @@ export default class GetOneUserService {
             }),
         },
       },
+    ];
+
+    if (isAuthenticatedUser) {
+      const lookup = {
+        from: "posts",
+        localField: "categoryResolution._id",
+        foreignField: "categoryResolutionId",
+        as: "posts"
+      }
+      const addFields = {
+        categoryResolution: {
+          $map: {
+            input: "$categoryResolution",
+            as: "category",
+            in: {
+              $mergeObjects: [
+                "$$category",
+                {
+                  postCount: {
+                    $size: {
+                      $filter: {
+                        input: "$posts",
+                        as: "post",
+                        cond: {
+                          $and: [
+                            {
+                              $eq: ["$$post.categoryResolutionId", "$$category._id"]
+                            },
+                            {
+                              $eq: ["$$post.type", "weeklyGoals"]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+      pipeline.push({ $lookup: lookup }, { $addFields: addFields })
+    }
+
+    pipeline.push(
       {
         $project: project,
-      },
-    ];
+      }
+    );
 
     const result = await this.userRepository.aggregate(pipeline);
     if (isAuthenticatedUser) {
