@@ -8,7 +8,7 @@ export default class UploadImageService {
     this.s3 = new ImageEntity();
   }
 
-  async handle(file: Express.Multer.File) {
+  async handle(file: Express.Multer.File | { originalname: string, buffer: Buffer }) {
     const command = new PutObjectCommand({
       Bucket: this.s3.bucket,
       Key: file.originalname,

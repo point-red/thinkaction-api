@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import GetImageService from "../services/images/get-image.service";
 import UploadImageService from "../services/images/upload-image.service";
 import { ImageService } from "../services/images/image.service";
+import { getResponse } from "../utils/url";
 
 export default class ImageController {
   private getImageService: GetImageService
@@ -14,14 +15,10 @@ export default class ImageController {
 
   public async getImage(req: Request, res: Response, next: NextFunction) {
     try {
-      const url = await ImageService.get(req.params.key)
-      res.setHeader('Content-Disposition', `attachment; filename="${req.params.key}"`);
-      if (!url) {
-        return res.status(404).send('Image not found.');
-      }
-      return res.sendFile(url);
-      // AWS Configuration
-      // res.status(200).json({ url })
+      const url = await this.getImageService.handle(req.params.key);
+      const response = await getResponse(url);
+      const buffer = await response.buffer();
+      res.status(200).send(buffer)
     } catch (e) {
       next(e)
     }
