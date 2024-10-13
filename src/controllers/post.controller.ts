@@ -74,7 +74,7 @@ export default class PostController {
 
       result.data = result.data.map((post: PostInterface) => ({
         ...post,
-        categoryResolution: (post as Record<string, any>).userInfo.categoryResolution.find((cr: any) => cr._id === post.categoryResolutionId)?.name,
+        categoryResolution: (post as Record<string, any>).userInfo?.categoryResolution.find?.((cr: any) => cr?._id === post.categoryResolutionId)?.name ?? "",
       }))
       // result.data = await Promise.all(result.data.map(async (post: PostInterface) => ({
       //   ...post,
