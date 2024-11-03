@@ -2,15 +2,19 @@ import { CloudStorage } from "../../utils/cloud-storage";
 import Uploader from "../uploader";
 // import GetImageService from "./get-image.service";
 // import UploadImageService from "./upload-image.service";
-import fs from 'fs';
+import fs from "fs";
 
 export class ImageService {
-  static async move(file: Express.Multer.File | Express.Multer.File[]): Promise<string[]> {
+  static async move(
+    file: Express.Multer.File | Express.Multer.File[]
+  ): Promise<string[]> {
     // const url = ''
     if (!Array.isArray(file)) {
       return this.move([file]);
     }
-    return await Promise.all(file.map(f => CloudStorage.move(f)));
+    return (await Promise.all(
+      file.map((f) => CloudStorage.move(f))
+    )) as string[];
     // Local Save Configuration
     // const uploader = new Uploader(file);
     // return await uploader.move();
@@ -25,7 +29,7 @@ export class ImageService {
     if (!Array.isArray(key)) {
       return await this.remove([key] as string[]);
     }
-    return await Promise.all(key.map(k => CloudStorage.remove(k)));
+    return await Promise.all(key.map((k) => CloudStorage.remove(k)));
     // const path = await ImageService.get(key as string);
     // if (path) {
     //   fs.rmSync(path);
