@@ -1,7 +1,7 @@
-import { PostRepository } from '../../repositories/post.repository';
-import { DocInterface } from '../../entities/docInterface';
-import { ObjectId } from 'mongodb';
-import { UserRepository } from '../../repositories/user.repository';
+import { PostRepository } from "../../repositories/post.repository";
+import { DocInterface } from "../../entities/docInterface";
+import { ObjectId } from "mongodb";
+import { UserRepository } from "../../repositories/user.repository";
 
 export default class GetMonthlyReportService {
   private postRepository: PostRepository;
@@ -11,8 +11,8 @@ export default class GetMonthlyReportService {
   }
 
   public async handle(data: DocInterface, authUserId: string) {
-    const startDate = new Date(data.year, 0, 1);
-    const endDate = new Date(data.year, 11, 31);
+    const startDate = new Date(data.year, data.month - 1, 1);
+    const endDate = new Date(data.year, data.month, 0);
 
     const pipeline = [
       {
@@ -21,136 +21,69 @@ export default class GetMonthlyReportService {
         },
       },
       {
-        $unwind: '$categoryResolution',
+        $unwind: "$categoryResolution",
       },
       {
         $match: {
           "categoryResolution.createdDate": {
             $gte: startDate,
-            $lt: endDate
-          }
-        },
-      },
-      {
-        $lookup: {
-          from: 'posts',
-          localField: 'categoryResolution._id',
-          foreignField: 'categoryResolutionId',
-          as: 'postsData',
-        },
-      },
-      {
-        $addFields: {
-          postsData: {
-            $filter: {
-              input: '$postsData',
-              as: 'post',
-              cond: { $eq: ['$$post.type', 'resolutions'] },
-            },
+            $lt: endDate,
           },
-          completeData: {
-            $filter: {
-              input: "$postsData",
-              as: "post",
-              cond: {
-                $and: [
-                  { $eq: ["$$post.type", "completeGoals"] },
-                  { $eq: ["$$post.isComplete", true] },
-                ]
-              }
-            }
-          }
         },
       },
       {
-        $unwind: '$postsData',
-      },
-      {
-        $unwind: {
-          path: "$completeData",
-          preserveNullAndEmptyArrays: true
+        $group: {
+          _id: {
+            year: { $year: "$categoryResolution.createdDate" },
+            week: { $week: "$categoryResolution.createdDate" },
+          },
+          count: { $sum: 1 },
+          categories: { $push: "$categoryResolution" },
         },
       },
       {
-        $project: {
-          _id: 1,
-          resolution: {
-            $mergeObjects: ["$categoryResolution", {
-              "updatedDate": "$postsData.updatedDate"
-            }, {
-                "dueDate": "$postsData.dueDate"
-              }, {
-                "completeDate": "$completeData.createdDate"
-              }]
-          }
-        },
+        $sort: { "_id.week": 1 },
       },
     ];
 
     const userRepository = new UserRepository();
-    const allPost = await userRepository.aggregate(pipeline);
+    const results = await userRepository.aggregate(pipeline);
 
     function getWeeksInMonth(year: number, month: number) {
       const weeks = [];
+      let startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0);
 
-      let startDate = new Date(year, month, 1);
-
-      const firstDayOfWeek = 1;
-      while (startDate.getDay() !== firstDayOfWeek) {
-        startDate.setDate(startDate.getDate() - 1);
-      }
-
-      while (startDate.getMonth() <= month || startDate.getDate() <= 7) {
-        let endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + 6);
-
-        if (endDate.getMonth() !== month) {
-          break;
-        }
-
-        if (startDate > endDate) {
-          break;
-        }
-
-        weeks.push({
-          weekNumber: weeks.length + 1,
-          startDate: new Date(startDate),
-          endDate: new Date(endDate)
-        });
-
+      while (startDate <= endDate) {
+        const weekNum = Math.ceil(startDate.getDate() / 7);
+        weeks[weekNum - 1] = {
+          weekNumber: weekNum,
+          count: 0,
+          categories: [],
+        };
         startDate.setDate(startDate.getDate() + 7);
       }
-
       return weeks;
     }
 
-    const weeksInMonth = getWeeksInMonth(Number(data.year), Number(data.month) - 1);
-    const map: Record<string, Record<string, boolean>> = {};
-    const currentDate = new Date();
-    const started: Record<string, boolean> = {};
-    const ended: Record<string, boolean> = {};
-    for (const { weekNumber, startDate, endDate } of weeksInMonth) {
-      const weekStr = 'Week ' + weekNumber;
-      if (!map[weekStr]) {
-        map[weekStr] = {};
-      }
-      for (const { resolution } of allPost) {
-        const completed = resolution.isComplete && resolution.completeDate;
-        if (startDate > currentDate && !completed) {
-          continue;
-        }
-        if (resolution.createdDate < endDate && !started[resolution.name]) {
-          started[resolution.name] = true;
-        }
-        if (started[resolution.name] && !ended[resolution.name]) {
-          map[weekStr][resolution.name] = completed;
-        }
-        if (resolution.completeDate && resolution.completeDate < endDate && (!completed || resolution.dueDate < endDate)) {
-          ended[resolution.name] = true;
-        }
-      }
-    }
+    const weeksInMonth = getWeeksInMonth(Number(data.year), Number(data.month));
 
-    return map;
+    // Map results to weeks
+    results.forEach((result) => {
+      const weekNum = Math.ceil(
+        new Date(result.categories[0].createdDate).getDate() / 7
+      );
+      if (weeksInMonth[weekNum - 1]) {
+        weeksInMonth[weekNum - 1].count = result.count;
+        weeksInMonth[weekNum - 1].categories = result.categories;
+      }
+    });
+
+    const response = {
+      total: results.reduce((acc, curr) => acc + curr.count, 0),
+      weeks: weeksInMonth,
+    };
+
+    return response;
   }
 }
