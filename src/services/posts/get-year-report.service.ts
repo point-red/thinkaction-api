@@ -5,9 +5,11 @@ import { UserRepository } from "../../repositories/user.repository";
 
 export default class GetYearReportService {
   private postRepository: PostRepository;
+  private userRepository: UserRepository;
 
-  constructor(postRepository: PostRepository) {
+  constructor(postRepository: PostRepository, userRepository: UserRepository) {
     this.postRepository = postRepository;
+    this.userRepository = userRepository;
   }
 
   public async handle(data: DocInterface, authUserId: string) {
@@ -17,30 +19,50 @@ export default class GetYearReportService {
     const pipeline = [
       {
         $match: {
-          userId: new ObjectId(authUserId), // Filter posts by the authenticated user
+          userId: new ObjectId(authUserId),
           createdDate: {
-            // Filter posts by the date range
             $gte: startDate,
             $lt: endDate,
           },
         },
       },
       {
-        $group: {
-          _id: {
-            year: { $year: "$createdDate" }, // Group by year of post creation
-            week: { $week: "$createdDate" }, // Group by week of post creation
-          },
-          count: { $sum: 1 }, // Count posts in each week
-          postIds: { $push: "$_id" }, // Optionally, keep track of post IDs
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
         },
       },
       {
-        $sort: { "_id.week": 1 }, // Sort by week
+        $unwind: "$user",
+      },
+      {
+        $unwind: "$user.categoryResolution",
+      },
+      {
+        $match: {
+          $expr: {
+            $eq: ["$categoryResolutionId", "$user.categoryResolution._id"],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdDate" },
+            week: { $week: "$createdDate" },
+          },
+          count: { $sum: 1 },
+          categories: { $push: "$user.categoryResolution" }, // Changed to $push
+        },
+      },
+      {
+        $sort: { "_id.week": 1 },
       },
     ];
 
-    const results = await this.postRepository.aggregate(pipeline); // Use postRepository
+    const results = await this.postRepository.aggregate(pipeline);
 
     function getWeeksInYear(year: number) {
       const weeks = [];
@@ -54,7 +76,7 @@ export default class GetYearReportService {
           weeks[weekNum - 1] = {
             weekNumber: weekNum,
             count: 0,
-            postIds: [], // Store post IDs if needed
+            categories: [],
           };
         }
         currentDate.setDate(currentDate.getDate() + 7);
@@ -76,13 +98,19 @@ export default class GetYearReportService {
       const weekNum = result._id.week;
       if (weeksInYear[weekNum - 1]) {
         weeksInYear[weekNum - 1].count = result.count;
-        weeksInYear[weekNum - 1].postIds = result.postIds;
+        weeksInYear[weekNum - 1].categories = result.categories;
       }
     });
 
     const response = {
       total: results.reduce((acc, curr) => acc + curr.count, 0),
-      weeks: weeksInYear.filter((week) => week !== null),
+      weeks: weeksInYear
+        .filter((week) => week !== null)
+        .map((weekData) => ({
+          weekNumber: weekData.weekNumber,
+          count: weekData.count,
+          categories: weekData.categories,
+        })),
     };
 
     return response;
