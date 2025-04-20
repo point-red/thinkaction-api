@@ -17,15 +17,9 @@ export default class GetYearReportService {
     const pipeline = [
       {
         $match: {
-          _id: new ObjectId(authUserId),
-        },
-      },
-      {
-        $unwind: "$categoryResolution",
-      },
-      {
-        $match: {
-          "categoryResolution.createdDate": {
+          userId: new ObjectId(authUserId), // Filter posts by the authenticated user
+          createdDate: {
+            // Filter posts by the date range
             $gte: startDate,
             $lt: endDate,
           },
@@ -34,20 +28,19 @@ export default class GetYearReportService {
       {
         $group: {
           _id: {
-            year: { $year: "$categoryResolution.createdDate" },
-            week: { $week: "$categoryResolution.createdDate" },
+            year: { $year: "$createdDate" }, // Group by year of post creation
+            week: { $week: "$createdDate" }, // Group by week of post creation
           },
-          count: { $sum: 1 },
-          categories: { $push: "$categoryResolution" },
+          count: { $sum: 1 }, // Count posts in each week
+          postIds: { $push: "$_id" }, // Optionally, keep track of post IDs
         },
       },
       {
-        $sort: { "_id.week": 1 },
+        $sort: { "_id.week": 1 }, // Sort by week
       },
     ];
 
-    const userRepository = new UserRepository();
-    const results = await userRepository.aggregate(pipeline);
+    const results = await this.postRepository.aggregate(pipeline); // Use postRepository
 
     function getWeeksInYear(year: number) {
       const weeks = [];
@@ -61,7 +54,7 @@ export default class GetYearReportService {
           weeks[weekNum - 1] = {
             weekNumber: weekNum,
             count: 0,
-            categories: [],
+            postIds: [], // Store post IDs if needed
           };
         }
         currentDate.setDate(currentDate.getDate() + 7);
@@ -83,7 +76,7 @@ export default class GetYearReportService {
       const weekNum = result._id.week;
       if (weeksInYear[weekNum - 1]) {
         weeksInYear[weekNum - 1].count = result.count;
-        weeksInYear[weekNum - 1].categories = result.categories;
+        weeksInYear[weekNum - 1].postIds = result.postIds;
       }
     });
 
