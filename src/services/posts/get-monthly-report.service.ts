@@ -1,15 +1,12 @@
 import { PostRepository } from "../../repositories/post.repository";
 import { DocInterface } from "../../entities/docInterface";
 import { ObjectId } from "mongodb";
-import { UserRepository } from "../../repositories/user.repository";
 
 export default class GetMonthlyReportService {
   private postRepository: PostRepository;
-  private userRepository: UserRepository;
 
-  constructor(postRepository: PostRepository, userRepository: UserRepository) {
+  constructor(postRepository: PostRepository) {
     this.postRepository = postRepository;
-    this.userRepository = userRepository;
   }
 
   public async handle(data: DocInterface, authUserId: string) {
