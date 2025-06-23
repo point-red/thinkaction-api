@@ -19,8 +19,7 @@ export default class ImageEntity {
   private generateS3Client() {
     return new S3Client({
       region: "auto",
-      // endpoint: `https://s3.${process.env.S3_REGION}.backblazeb2.com`,
-      endpoint: `https://${process.env.S3_BUCKET_ID}.r2.cloudflarestorage.com/thinkaction-dev`,
+      endpoint: `https://s3.${process.env.S3_REGION}.backblazeb2.com`,
       credentials: {
         accessKeyId: process.env.S3_ACCESS_KEY as string,
         secretAccessKey: process.env.S3_SECRET_ACCESS_KEY as string,
